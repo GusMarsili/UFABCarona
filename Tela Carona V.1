@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UFABCarona</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #006633, #FFCC00);
+            min-height: 100vh;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 450px;
+            text-align: left;
+        }
+        .button {
+            width: 100%;
+            background-color: #004d26;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .button:hover {
+            background-color: #003d1a;
+            transform: scale(1.05);
+        }
+        .hidden {
+            display: none;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .caronas-container {
+            margin-top: 20px;
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <div id="inicio" class="container">
+        <h2>Bem-vindo ao UFABCarona</h2>
+        <p>Selecione uma opção para continuar:</p>
+        <button class="button" onclick="mostrarTela('motorista')">Sou Motorista</button>
+        <button class="button" onclick="mostrarTela('passageiro')">Preciso de uma Carona</button>
+    </div>
+    
+    <div id="motorista" class="container hidden">
+        <h2>Ofereça uma Carona</h2>
+        <form id="caronaForm">
+            <div class="form-group">
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" required>
+            </div>
+            <div class="form-group">
+                <label for="horario">Horário disponível:</label>
+                <input type="time" id="horario" required>
+            </div>
+            <div class="form-group">
+                <label for="saida">Local de Partida:</label>
+                <input type="text" id="saida" required>
+            </div>
+            <div class="form-group">
+                <label for="chegada">Local de Chegada:</label>
+                <input type="text" id="chegada" required>
+            </div>
+            <div class="form-group">
+                <label for="ponto">Ponto de encontro:</label>
+                <input type="text" id="ponto" required>
+            </div>
+            <div class="form-group">
+                <label for="tipo">Tipo do veículo:</label>
+                <select id="tipo" onchange="atualizarVagas()" required>
+                    <option value="Carro">Carro</option>
+                    <option value="Moto">Moto</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="marca">Marca do veículo:</label>
+                <select id="marca" required>
+                    <option value="Fiat">Fiat</option>
+                    <option value="Volkswagen">Volkswagen</option>
+                    <option value="Chevrolet">Chevrolet</option>
+                    <option value="Ford">Ford</option>
+                    <option value="Toyota">Toyota</option>
+                    <option value="Hyundai">Hyundai</option>
+                    <option value="Honda">Honda</option>
+                    <option value="Renault">Renault</option>
+                    <option value="Nissan">Nissan</option>
+                    <option value="Peugeot">Peugeot</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modelo">Modelo do veículo:</label>
+                <input type="text" id="modelo" required>
+            </div>
+            <div class="form-group">
+                <label for="placa">Placa do veículo:</label>
+                <input type="text" id="placa" required>
+            </div>
+            <div class="form-group">
+                <label for="vagas">Vagas disponíveis:</label>
+                <input type="number" id="vagas" min="1" max="4" required>
+            </div>
+            <div class="form-group">
+                <label for="preco">Preço da carona (R$):</label>
+                <input type="number" id="preco" min="0" step="0.50" required>
+            </div>
+            <button type="submit" class="button">Oferecer Carona</button>
+            <button type="button" class="button" onclick="voltarHome()">Voltar ao Início</button>
+        </form>
+    </div>
+    
+    <div id="passageiro" class="caronas-container hidden">
+        <h2>Caronas Disponíveis</h2>
+        <div id="listaCaronas"></div>
+        <button class="button" onclick="voltarHome()">Voltar ao Início</button>
+    </div>
+    
+    <script>
+        function mostrarTela(tela) {
+            document.getElementById('inicio').classList.add('hidden');
+            document.getElementById(tela).classList.remove('hidden');
+        }
+        
+        function voltarHome() {
+            location.reload();
+        }
+        
+        function atualizarVagas() {
+            let tipo = document.getElementById("tipo").value;
+            let vagasInput = document.getElementById("vagas");
+            vagasInput.max = tipo === "Moto" ? "1" : "4";
+        }
+    </script>
+</body>
+</html>
