@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "874462379219",
+    "firebase_url": "https://ufabcarona-default-rtdb.firebaseio.com",
+    "project_id": "ufabcarona",
+    "storage_bucket": "ufabcarona.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:874462379219:android:7669cd4755389d16eba826",
+        "android_client_info": {
+          "package_name": "com.example.ufabcarona"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "874462379219-lqlroos7p484tvr0l2avrqh3tq0fsm34.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ufabcarona",
+            "certificate_hash": "1ad23b269dd17329a60ea7c8d2ec7f2588ecee9d"
+          }
+        },
+        {
+          "client_id": "874462379219-up3jsj6ev4u8bniu9gq3c99ilcsart8c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3RQPKIltjUB2KISZY1jBBFM30QgUjG0Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "874462379219-up3jsj6ev4u8bniu9gq3c99ilcsart8c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
