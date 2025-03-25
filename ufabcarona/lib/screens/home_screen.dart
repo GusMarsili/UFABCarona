@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'create_ride_screen.dart';
+import 'list_rides_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final User user;
@@ -28,6 +30,28 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pop(context);
               },
               child: const Text("Sair"),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CreateRideScreen(user: user),
+                  ),
+                );
+              },
+              child: Text("Criar Carona"),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ListRidesScreen()),
+                );
+              },
+              child: Text("Ver Caronas"),
             ),
           ],
         ),
