@@ -61,6 +61,15 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  assets:
+    - lib/assets/imgs/logoUFABCarona.png
+    
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: lib/assets/fonts/Poppins-Regular.ttf
+
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

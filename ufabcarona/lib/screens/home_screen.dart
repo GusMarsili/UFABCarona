@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'create_ride_screen.dart';
 import 'list_rides_screen.dart';
+import 'carona_forms.dart';
+// import 'criarCarona_Uber.dart';
+import 'uber_forms.dart';
 
 class HomeScreen extends StatelessWidget {
   final User user;
@@ -37,11 +39,22 @@ class HomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => CreateRideScreen(user: user),
+                    builder: (context) => CaronaForms(user: user),
                   ),
                 );
               },
               child: Text("Criar Carona"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(                    
+                    builder: (context) => UberForms(user: user),
+                  ),
+                );
+              },
+              child: Text("Criar Grupo Uber"),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
