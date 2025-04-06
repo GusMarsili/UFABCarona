@@ -38,10 +38,16 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  google_nav_bar: ^5.0.6
+  provider: 6.1.2
+  google_fonts: 6.1.0
+  flutter_bloc: ^8.1.3
+  iconly: ^1.0.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_svg: ^1.0.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -62,12 +68,18 @@ flutter:
   uses-material-design: true
 
   assets:
-    - lib/assets/imgs/logoUFABCarona.png
+    - lib/images/logoUFABCarona.png
+    - lib/images/logo-branco.png
+    - lib/images/car.png
+    - lib/images/uber2.png
+    - lib/images/logo-degrade.png
+    - lib/images/car.svg
+  #   - images/a_dot_ham.jpeg
     
   fonts:
     - family: Poppins
       fonts:
-        - asset: lib/assets/fonts/Poppins-Regular.ttf
+        - asset: lib/fonts/Poppins-Regular.ttf
 
 
   # To add assets to your application, add an assets section, like this:
