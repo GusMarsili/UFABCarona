@@ -4,7 +4,35 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CaronasPage extends StatelessWidget {
-  const CaronasPage({super.key, required User user});
+  final User user;
+  const CaronasPage({super.key, required this.user});
+
+  // Função para deletar uma carona com confirmação
+  Future<void> _deleteRide(DocumentSnapshot document, BuildContext context) async {
+    bool confirm = await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Confirmar Deleção"),
+        content: const Text("Deseja deletar esta carona?"),
+        actions: [
+          TextButton(
+            child: const Text("Cancelar"),
+            onPressed: () => Navigator.of(ctx).pop(false),
+          ),
+          TextButton(
+            child: const Text("Deletar"),
+            onPressed: () => Navigator.of(ctx).pop(true),
+          ),
+        ],
+      ),
+    );
+    if (confirm) {
+      await document.reference.delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Carona deletada com sucesso!")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +72,8 @@ class CaronasPage extends StatelessWidget {
             children: snapshot.data!.docs.map((DocumentSnapshot document) {
               Map<String, dynamic> data =
                   document.data() as Map<String, dynamic>;
+              // Verifica se a carona foi criada pelo usuário atual
+              bool isOwner = data['creatorId'] == user.uid;
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 color: Colors.white,
@@ -52,6 +82,28 @@ class CaronasPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ListTile(
+                  // Usamos trailing para exibir o ícone de deletar no lado direito
+                  trailing: isOwner
+                      ? SizedBox(
+                          height: 40,
+                          width: MediaQuery.of(context).size.width * 0.12,
+                          child: Align(
+                            alignment: Alignment.topRight,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.red,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                _deleteRide(document, context);
+                              },
+                            ),
+                          ),
+                        )
+                      : null,
                   title: Text(
                     "Destino: ${data['destino'] ?? 'N/I'}",
                     style: GoogleFonts.montserrat(

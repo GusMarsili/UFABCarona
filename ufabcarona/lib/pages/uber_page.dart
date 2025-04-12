@@ -4,7 +4,35 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class UberPage extends StatelessWidget {
-  const UberPage({super.key, required User user});
+  final User user;
+  const UberPage({super.key, required this.user});
+
+  // Função para deletar um grupo Uber com confirmação
+  Future<void> _deleteUberGroup(DocumentSnapshot document, BuildContext context) async {
+    bool confirm = await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Confirmar Deleção"),
+        content: const Text("Deseja deletar este grupo Uber?"),
+        actions: [
+          TextButton(
+            child: const Text("Cancelar"),
+            onPressed: () => Navigator.of(ctx).pop(false),
+          ),
+          TextButton(
+            child: const Text("Deletar"),
+            onPressed: () => Navigator.of(ctx).pop(true),
+          ),
+        ],
+      ),
+    );
+    if (confirm) {
+      await document.reference.delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Grupo Uber deletado com sucesso!")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +41,7 @@ class UberPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.white, 
         elevation: 0,
         title: Text(
           "Grupos Uber",
@@ -44,6 +72,8 @@ class UberPage extends StatelessWidget {
             children: snapshot.data!.docs.map((DocumentSnapshot document) {
               Map<String, dynamic> data =
                   document.data() as Map<String, dynamic>;
+              // Verifica se o grupo foi criado pelo usuário atual
+              bool isOwner = data['creatorId'] == user.uid;
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 color: Colors.white,
@@ -52,6 +82,24 @@ class UberPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ListTile(
+                  trailing: isOwner
+                      ? Container(
+                          width: MediaQuery.of(context).size.width * 0.12,
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            icon: const Icon(
+                              Icons.close,
+                              color: Colors.red,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              _deleteUberGroup(document, context);
+                            },
+                          ),
+                        )
+                      : null,
                   title: Text(
                     "Destino: ${data['destino'] ?? 'N/I'}",
                     style: GoogleFonts.montserrat(

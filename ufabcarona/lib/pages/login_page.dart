@@ -94,8 +94,8 @@ class LoginScreen extends StatelessWidget {
 
                 // Botão de Login com Google
                 SizedBox(
-                  width: 200,
-                  height: 50,
+                  // width: 200,
+                  // height: 50,
                   child: ElevatedButton(
                     onPressed: () async {
                       try {
@@ -122,6 +122,7 @@ class LoginScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(25),
                       ),
                       elevation: 5,
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                     ),
                     child: const Text(
                       'Entrar com Google',
