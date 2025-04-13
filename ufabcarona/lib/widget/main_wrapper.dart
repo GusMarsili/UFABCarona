@@ -48,7 +48,12 @@ class _MainWrapperState extends State<MainWrapper> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _mainWrapperAppBar(),
-      bottomNavigationBar: _mainWrapperBottomNavBar(context),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 1.0), // Adiciona 1 pixel de padding no fundo
+          child: _mainWrapperBottomNavBar(context),
+        ),
+      ),
       floatingActionButton: _mainWrappedFab(context),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: _mainWrapperBody(topLevelPages),
@@ -107,7 +112,7 @@ class _MainWrapperState extends State<MainWrapper> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 4),
+            const SizedBox(height: 3), // Reduzido de 4 para 3 (Overflow no tablet)
             Icon(
               context.watch<BottomNavCubit>().state == page
                   ? filledIcon

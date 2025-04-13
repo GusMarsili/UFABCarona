@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'carona_detail_page.dart';
 
 class CaronasPage extends StatelessWidget {
   final User user;
@@ -82,7 +83,18 @@ class CaronasPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ListTile(
-                  // Usamos trailing para exibir o ícone de deletar no lado direito
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CaronaDetailPage(
+                          user: user,              
+                          rideId: document.id,
+                          isOwner: isOwner,
+                        ),
+                      ),
+                    );
+                  },
                   trailing: isOwner
                       ? SizedBox(
                           height: 40,

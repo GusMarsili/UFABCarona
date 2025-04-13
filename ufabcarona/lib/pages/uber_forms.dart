@@ -11,11 +11,11 @@ class UberForms extends StatefulWidget {
   final String? groupId;
   
   const UberForms({
-    Key? key,
+    super.key,
     required this.user,
     this.groupData,
     this.groupId,
-  }) : super(key: key);
+  });
 
   @override
   State<UberForms> createState() => _UberFormsState();
@@ -57,6 +57,9 @@ class _UberFormsState extends State<UberForms> {
         // Modo criação
         await FirebaseFirestore.instance.collection('uberGroups').add({
           'creatorId': widget.user.uid,
+          'creatorName': widget.user.displayName,
+          'creatorEmail': widget.user.email,
+          'creatorPhotoURL': widget.user.photoURL,
           'origem': _origemController.text,
           'destino': _destinoController.text,
           'horario': _horarioController.text,
@@ -66,6 +69,7 @@ class _UberFormsState extends State<UberForms> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Grupo Uber criado com sucesso!")),
         );
+
       } else {
         // Modo edição
         await FirebaseFirestore.instance
@@ -83,11 +87,32 @@ class _UberFormsState extends State<UberForms> {
         );
       }
       // Limpa os campos (opcional – pode manter os dados para edição contínua)
-      // _origemController.clear();
-      // _destinoController.clear();
-      // _horarioController.clear();
-      // _pontoEncontroController.clear();
-      // Você pode também decidir permanecer na página para futuras edições
+      _origemController.clear();
+      _destinoController.clear();
+      _horarioController.clear();
+      _pontoEncontroController.clear();
+
+      // Exibir um modal de loading que bloqueia a interação
+      showDialog(
+        context: context,
+        barrierDismissible: false, // impede que o usuário feche o diálogo
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Aguarda 1 segundo para que o SnackBar seja visível
+      await Future.delayed(const Duration(seconds: 1));
+
+      // Fecha o diálogo de loading
+      Navigator.of(context).pop();
+
+      Navigator.pop(context);
+      // Depois, direciona o usuário para a página UberPage
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => MainWrapper(user: widget.user)),
+      // );
     }
   }
 
@@ -157,10 +182,15 @@ class _UberFormsState extends State<UberForms> {
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       textStyle: const TextStyle(fontSize: 20),
                     ),
-                    child: Text(
-                      "Salvar",
-                      style: GoogleFonts.poppins(fontSize: 20),
-                    ),
+                    child: widget.groupData == null
+                        ? const Text(
+                            "Criar",
+                            style: TextStyle(fontFamily: "Poppins", fontSize: 20),
+                          )
+                        : Text(
+                            "Salvar",
+                            style: const TextStyle(fontFamily: "Poppins", fontSize: 20),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 20),
