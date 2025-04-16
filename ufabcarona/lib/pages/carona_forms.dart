@@ -39,7 +39,6 @@ class _CaronaFormsState extends State<CaronaForms> {
   @override
   void initState() {
     super.initState();
-    // Se estiver em modo edição, pré-preenche os campos com os dados existentes
     if (widget.rideData != null) {
       _origemController.text = widget.rideData!['origem'] ?? '';
       _destinoController.text = widget.rideData!['destino'] ?? '';
@@ -72,7 +71,6 @@ class _CaronaFormsState extends State<CaronaForms> {
   Future<void> _saveCarona() async {
     if (_formKey.currentState!.validate()) {
       if (widget.rideData == null) {
-        // Modo criação
         await FirebaseFirestore.instance.collection('rides').add({
           'creatorId': widget.user.uid,
           'creatorName': widget.user.displayName,
@@ -88,13 +86,13 @@ class _CaronaFormsState extends State<CaronaForms> {
           'placa': _placaController.text,
           'valor': _valorController.text,
           'paradas': _paradasController.text,
+          'members': <String>[], // Novo campo para reservas
           'timestamp': FieldValue.serverTimestamp(),
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Carona criada com sucesso!")),
         );
       } else {
-        // Modo edição
         await FirebaseFirestore.instance.collection('rides').doc(widget.rideId).update({
           'origem': _origemController.text,
           'destino': _destinoController.text,
@@ -112,7 +110,8 @@ class _CaronaFormsState extends State<CaronaForms> {
           const SnackBar(content: Text("Carona atualizada com sucesso!")),
         );
       }
-      // Limpa os campos do formulário
+
+      // Limpa os campos
       _origemController.clear();
       _destinoController.clear();
       _horarioController.clear();
@@ -124,35 +123,23 @@ class _CaronaFormsState extends State<CaronaForms> {
       _valorController.clear();
       _paradasController.clear();
 
-      // Exibir um modal de loading que bloqueia a interação
+      // Modal de loading
       showDialog(
         context: context,
-        barrierDismissible: false, // impede que o usuário feche o diálogo
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
       );
-
-      // Aguarda 1 segundo para que o SnackBar seja visível
       await Future.delayed(const Duration(seconds: 1));
-
-      // Fecha o diálogo de loading
       Navigator.of(context).pop();
-
       Navigator.pop(context);
-      // Depois, direciona o usuário para a página de listagem de caronas
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => MainWrapper(user: widget.user)),
-      // );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final String title = widget.rideData == null ? "Criar Carona" : "Modificar Carona";
-    double height = MediaQuery.of(context).size.height;
-    double spacing = height * 0.012;
+    final height = MediaQuery.of(context).size.height;
+    final spacing = height * 0.012;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -177,43 +164,34 @@ class _CaronaFormsState extends State<CaronaForms> {
                 TextFormField(
                   controller: _origemController,
                   decoration: const InputDecoration(labelText: 'Origem'),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? "Informe a origem" : null,
+                  validator: (v) => v == null || v.isEmpty ? "Informe a origem" : null,
                 ),
                 SizedBox(height: spacing),
                 TextFormField(
                   controller: _destinoController,
                   decoration: const InputDecoration(labelText: 'Destino'),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? "Informe o destino" : null,
+                  validator: (v) => v == null || v.isEmpty ? "Informe o destino" : null,
                 ),
                 SizedBox(height: spacing),
                 TextFormField(
                   controller: _horarioController,
                   decoration: const InputDecoration(labelText: 'Horário'),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? "Informe o horário" : null,
+                  validator: (v) => v == null || v.isEmpty ? "Informe o horário" : null,
                 ),
                 SizedBox(height: spacing),
                 TextFormField(
                   controller: _pontoEncontroController,
                   decoration: const InputDecoration(labelText: 'Ponto de Encontro'),
-                  validator: (value) => value == null || value.isEmpty
-                      ? "Informe o ponto de encontro"
-                      : null,
+                  validator: (v) => v == null || v.isEmpty ? "Informe o ponto de encontro" : null,
                 ),
                 SizedBox(height: spacing),
                 TextFormField(
                   controller: _vagasController,
                   decoration: const InputDecoration(labelText: 'Vagas'),
                   keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Informe o número de vagas";
-                    }
-                    if (int.tryParse(value) == null) {
-                      return "Informe um número válido";
-                    }
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return "Informe o número de vagas";
+                    if (int.tryParse(v) == null) return "Informe um número válido";
                     return null;
                   },
                 ),
@@ -221,45 +199,36 @@ class _CaronaFormsState extends State<CaronaForms> {
                 TextFormField(
                   controller: _marcaController,
                   decoration: const InputDecoration(labelText: 'Marca do carro'),
-                  validator: (value) => value == null || value.isEmpty
-                      ? "Informe a marca do carro"
-                      : null,
+                  validator: (v) => v == null || v.isEmpty ? "Informe a marca do carro" : null,
                 ),
                 SizedBox(height: spacing),
                 TextFormField(
                   controller: _modeloController,
                   decoration: const InputDecoration(labelText: 'Modelo do carro'),
-                  validator: (value) => value == null || value.isEmpty
-                      ? "Informe o modelo do carro"
-                      : null,
+                  validator: (v) => v == null || v.isEmpty ? "Informe o modelo do carro" : null,
                 ),
                 SizedBox(height: spacing),
                 TextFormField(
                   controller: _placaController,
                   decoration: const InputDecoration(labelText: 'Placa do carro'),
-                  validator: (value) => value == null || value.isEmpty
-                      ? "Informe a placa do carro"
-                      : null,
+                  validator: (v) => v == null || v.isEmpty ? "Informe a placa do carro" : null,
                 ),
                 SizedBox(height: spacing),
                 TextFormField(
                   controller: _valorController,
                   decoration: const InputDecoration(labelText: 'Valor'),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? "Informe o valor" : null,
+                  validator: (v) => v == null || v.isEmpty ? "Informe o valor" : null,
                 ),
                 SizedBox(height: spacing),
                 TextFormField(
                   controller: _paradasController,
                   decoration: const InputDecoration(labelText: 'Paradas'),
-                  validator: (value) => value == null || value.isEmpty
-                      ? "Informe as paradas"
-                      : null,
+                  validator: (v) => v == null || v.isEmpty ? "Informe as paradas" : null,
                 ),
                 SizedBox(height: spacing),
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.9,
-                  height: MediaQuery.of(context).size.height * 0.06,
+                  height: height * 0.06,
                   child: ElevatedButton(
                     onPressed: _saveCarona,
                     style: ElevatedButton.styleFrom(
@@ -269,14 +238,8 @@ class _CaronaFormsState extends State<CaronaForms> {
                       textStyle: const TextStyle(fontSize: 20),
                     ),
                     child: widget.rideData == null
-                        ? const Text(
-                            "Criar",
-                            style: TextStyle(fontFamily: "Poppins", fontSize: 20),
-                          )
-                        : const Text(
-                            "Salvar",
-                            style: TextStyle(fontFamily: "Poppins", fontSize: 20),
-                          ),
+                        ? const Text("Criar", style: TextStyle(fontFamily: "Poppins", fontSize: 20))
+                        : const Text("Salvar", style: TextStyle(fontFamily: "Poppins", fontSize: 20)),
                   ),
                 ),
                 SizedBox(height: spacing),

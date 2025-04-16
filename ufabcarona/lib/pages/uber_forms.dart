@@ -54,7 +54,6 @@ class _UberFormsState extends State<UberForms> {
   Future<void> _saveUberGroup() async {
     if (_formKey.currentState!.validate()) {
       if (widget.groupData == null) {
-        // Modo criação
         await FirebaseFirestore.instance.collection('uberGroups').add({
           'creatorId': widget.user.uid,
           'creatorName': widget.user.displayName,
@@ -64,14 +63,13 @@ class _UberFormsState extends State<UberForms> {
           'destino': _destinoController.text,
           'horario': _horarioController.text,
           'pontoEncontro': _pontoEncontroController.text,
+          'members': <String>[], // Novo campo para reservas
           'timestamp': FieldValue.serverTimestamp(),
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Grupo Uber criado com sucesso!")),
         );
-
       } else {
-        // Modo edição
         await FirebaseFirestore.instance
             .collection('uberGroups')
             .doc(widget.groupId)
@@ -86,7 +84,7 @@ class _UberFormsState extends State<UberForms> {
           const SnackBar(content: Text("Grupo Uber atualizado com sucesso!")),
         );
       }
-      // Limpa os campos (opcional – pode manter os dados para edição contínua)
+      // Limpa os campos do formulário
       _origemController.clear();
       _destinoController.clear();
       _horarioController.clear();
@@ -96,9 +94,7 @@ class _UberFormsState extends State<UberForms> {
       showDialog(
         context: context,
         barrierDismissible: false, // impede que o usuário feche o diálogo
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (_) => const Center(child: CircularProgressIndicator()),
       );
 
       // Aguarda 1 segundo para que o SnackBar seja visível
@@ -107,24 +103,20 @@ class _UberFormsState extends State<UberForms> {
       // Fecha o diálogo de loading
       Navigator.of(context).pop();
 
+      // Volta para a página anterior
       Navigator.pop(context);
-      // Depois, direciona o usuário para a página UberPage
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => MainWrapper(user: widget.user)),
-      // );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final title = widget.groupData == null ? "Criar Grupo Uber" : "Modificar Grupo Uber";
+    final title = widget.groupData == null
+        ? "Criar Grupo Uber"
+        : "Modificar Grupo Uber";
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBarScreen().build(
-        // title: title, // Se o AppBarScreen puder receber um título
-      ),
+      appBar: AppBarScreen().build(),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -166,9 +158,10 @@ class _UberFormsState extends State<UberForms> {
                 TextFormField(
                   controller: _pontoEncontroController,
                   decoration: const InputDecoration(labelText: 'Ponto de Encontro'),
-                  validator: (value) => value == null || value.isEmpty
-                      ? "Informe o ponto de encontro"
-                      : null,
+                  validator: (value) =>
+                      value == null || value.isEmpty
+                          ? "Informe o ponto de encontro"
+                          : null,
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
@@ -187,9 +180,9 @@ class _UberFormsState extends State<UberForms> {
                             "Criar",
                             style: TextStyle(fontFamily: "Poppins", fontSize: 20),
                           )
-                        : Text(
+                        : const Text(
                             "Salvar",
-                            style: const TextStyle(fontFamily: "Poppins", fontSize: 20),
+                            style: TextStyle(fontFamily: "Poppins", fontSize: 20),
                           ),
                   ),
                 ),

@@ -43,6 +43,7 @@ dependencies:
   google_fonts: ^6.2.1
   flutter_bloc: ^9.1.0
   iconly: ^1.0.1
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.3
@@ -80,6 +81,7 @@ flutter:
     - lib/images/uber2.png
     - lib/images/logo-degrade.png
     - lib/images/car.svg
+    - lib/images/arrow.png
   #   - images/a_dot_ham.jpeg
     
   fonts:

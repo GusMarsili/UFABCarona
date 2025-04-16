@@ -18,8 +18,8 @@ class LoginScreen extends StatelessWidget {
     );
 
     // Realiza o login com o Firebase
-    final UserCredential userCredential =
-        await FirebaseAuth.instance.signInWithCredential(credential);
+    final UserCredential userCredential = await FirebaseAuth.instance
+        .signInWithCredential(credential);
     final User? user = userCredential.user;
 
     // Verifica se o email pertence ao domínio permitido
@@ -46,10 +46,7 @@ class LoginScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color.fromARGB(255, 0, 255, 98), 
-              Color(0xFFDAA520),
-            ],
+            colors: [Color.fromARGB(255, 0, 255, 98), Color(0xFFDAA520)],
           ),
         ),
         child: SafeArea(
@@ -61,13 +58,10 @@ class LoginScreen extends StatelessWidget {
                 Container(
                   width: 120,
                   height: 120,
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                  ),
-                  child: const Icon(
-                    Icons.directions_car,
-                    color: Colors.white,
-                    size: 100,
+                  decoration: const BoxDecoration(color: Colors.transparent),
+                  child: Image.asset(
+                    'lib/images/logo-branco.png',
+                    fit: BoxFit.cover,
                   ),
                 ),
 
@@ -99,12 +93,15 @@ class LoginScreen extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () async {
                       try {
-                        UserCredential? userCredential = await signInWithGoogle();
+                        UserCredential? userCredential =
+                            await signInWithGoogle();
                         if (userCredential != null) {
                           // Após login com sucesso, redireciona para a tela principal (AuthGate)
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => const AuthGate()),
+                            MaterialPageRoute(
+                              builder: (context) => const AuthGate(),
+                            ),
                           );
                         }
                       } on FirebaseAuthException catch (e) {
@@ -122,7 +119,10 @@ class LoginScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(25),
                       ),
                       elevation: 5,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 14,
+                      ),
                     ),
                     child: const Text(
                       'Entrar com Google',

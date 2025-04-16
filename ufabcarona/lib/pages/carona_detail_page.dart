@@ -15,10 +15,40 @@ class CaronaDetailPage extends StatelessWidget {
     required this.rideId,
     required this.isOwner,
   });
+
+  /// Apresenta um diálogo de confirmação e deleta o documento se confirmado.
+  Future<void> _deleteRide(BuildContext context) async {
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Confirmar Deleção"),
+        content: const Text("Deseja deletar esta carona?"),
+        actions: [
+          TextButton(
+            child: const Text("Cancelar"),
+            onPressed: () => Navigator.of(ctx).pop(false),
+          ),
+          TextButton(
+            child: const Text("Deletar"),
+            onPressed: () => Navigator.of(ctx).pop(true),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      await FirebaseFirestore.instance
+          .collection('rides')
+          .doc(rideId)
+          .delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Carona deletada com sucesso!")),
+      );
+      Navigator.of(context).pop(); // volta para a lista
+    }
+  }
   
   @override
   Widget build(BuildContext context) {
-    // Agora, usamos um StreamBuilder para escutar o documento em tempo real.
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -44,13 +74,18 @@ class CaronaDetailPage extends StatelessWidget {
           }
           if (!snapshot.hasData || !snapshot.data!.exists) {
             return const Center(
-              child: Text("Carona não encontrada.", style: TextStyle(color: Colors.black)),
+              child: Text(
+                "Carona não encontrada.",
+                style: TextStyle(color: Colors.black),
+              ),
             );
           }
           
-          Map<String, dynamic> rideData = snapshot.data!.data() as Map<String, dynamic>;
-          final String creatorName = rideData['creatorName'] ?? 'N/I';
-          final String? creatorPhotoURL = rideData['creatorPhotoURL'];
+          final data = snapshot.data!.data() as Map<String, dynamic>;
+          final List<dynamic> members = data['members'] ?? [];
+          final int vagas = data['vagas'] ?? 0;
+          final bool hasSlot = members.length < vagas;
+          final bool isMember = members.contains(user.uid);
           
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -59,52 +94,53 @@ class CaronaDetailPage extends StatelessWidget {
               children: [
                 // Dados da carona
                 Text(
-                  "Destino: ${rideData['destino'] ?? 'N/I'}",
-                  style: GoogleFonts.montserrat(fontSize: 18, fontWeight: FontWeight.bold),
+                  "Destino: ${data['destino'] ?? 'N/I'}",
+                  style: GoogleFonts.montserrat(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Origem: ${rideData['origem'] ?? 'N/I'}",
+                  "Origem: ${data['origem'] ?? 'N/I'}",
                   style: GoogleFonts.montserrat(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Horário: ${rideData['horario'] ?? 'N/I'}",
+                  "Horário: ${data['horario'] ?? 'N/I'}",
                   style: GoogleFonts.montserrat(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Ponto de Encontro: ${rideData['pontoEncontro'] ?? 'N/I'}",
+                  "Ponto de Encontro: ${data['pontoEncontro'] ?? 'N/I'}",
                   style: GoogleFonts.montserrat(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Vagas: ${rideData['vagas'] ?? 'N/I'}",
+                  "Vagas: $vagas",
                   style: GoogleFonts.montserrat(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Marca do Carro: ${rideData['marca'] ?? 'N/I'}",
+                  "Marca do Carro: ${data['marca'] ?? 'N/I'}",
                   style: GoogleFonts.montserrat(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Modelo do Carro: ${rideData['modelo'] ?? 'N/I'}",
+                  "Modelo do Carro: ${data['modelo'] ?? 'N/I'}",
                   style: GoogleFonts.montserrat(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Placa do Carro: ${rideData['placa'] ?? 'N/I'}",
+                  "Placa do Carro: ${data['placa'] ?? 'N/I'}",
                   style: GoogleFonts.montserrat(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Valor: R\$ ${rideData['valor'] ?? 'N/I'}",
+                  "Valor: R\$ ${data['valor'] ?? 'N/I'}",
                   style: GoogleFonts.montserrat(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Número de Paradas: ${rideData['paradas'] ?? 'N/I'}",
+                  "Número de Paradas: ${data['paradas'] ?? 'N/I'}",
                   style: GoogleFonts.montserrat(fontSize: 16),
                 ),
                 const SizedBox(height: 16),
@@ -112,47 +148,121 @@ class CaronaDetailPage extends StatelessWidget {
                 Row(
                   children: [
                     CircleAvatar(
-                      backgroundImage: creatorPhotoURL != null && creatorPhotoURL.isNotEmpty
-                          ? NetworkImage(creatorPhotoURL)
+                      backgroundImage: (data['creatorPhotoURL'] ?? '').isNotEmpty
+                          ? NetworkImage(data['creatorPhotoURL'])
                           : null,
                       radius: 20,
-                      child: (creatorPhotoURL == null || creatorPhotoURL.isEmpty)
+                      child: (data['creatorPhotoURL'] ?? '').isEmpty
                           ? const Icon(Icons.person, size: 20)
                           : null,
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      "Criador: $creatorName",
+                      "Criador: ${data['creatorName'] ?? 'N/I'}",
                       style: GoogleFonts.montserrat(fontSize: 16),
                     ),
                   ],
                 ),
-                const SizedBox(height: 32),
-                // Botão de edição (exibido apenas se o usuário for o criador)
-                if (isOwner)
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      icon: const Icon(
-                        Icons.edit,
-                        color: Colors.blue,
-                        size: 20,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CaronaForms(
-                              user: user,
-                              rideData: rideData,
-                              rideId: rideId,
-                            ),
-                          ),
-                        );
+                const SizedBox(height: 24),
+                // Botão Reservar
+                if (!isOwner && !isMember && hasSlot)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await FirebaseFirestore.instance
+                            .collection('rides')
+                            .doc(rideId)
+                            .update({
+                          'members': FieldValue.arrayUnion([user.uid]),
+                        });
                       },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFFCC00),
+                        foregroundColor: Colors.black,
+                      ),
+                      child: const Text("Reservar"),
                     ),
+                  ),
+                const SizedBox(height: 24),
+                // Lista de membros
+                if (members.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Membros:",
+                        style: GoogleFonts.montserrat(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: members.map<Widget>((memberId) {
+                          final bool isCurrent = memberId == user.uid;
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircleAvatar(
+                                radius: 20,
+                                child: Text(
+                                  isCurrent ? 'Você' : memberId.substring(0,2).toUpperCase(),
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                isCurrent ? 'Você' : memberId,
+                                style: GoogleFonts.montserrat(fontSize: 12),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 24),
+                // Botões de ação para o criador
+                if (isOwner)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: const Icon(
+                          Icons.delete,
+                          color: Colors.red,
+                          size: 20,
+                        ),
+                        onPressed: () => _deleteRide(context),
+                      ),
+                      const SizedBox(width: 16),
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: const Icon(
+                          Icons.edit,
+                          color: Colors.blue,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CaronaForms(
+                                user: user,
+                                rideData: data,
+                                rideId: rideId,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
               ],
             ),
