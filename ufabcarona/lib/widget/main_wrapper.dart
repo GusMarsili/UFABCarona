@@ -42,7 +42,7 @@ class _MainWrapperState extends State<MainWrapper> {
       UberPage(user: widget.user),
       ReservasPage(user: widget.user),
       PerfilPage(user: widget.user),
-      CriarPage(user: widget.user),
+      
     ];
 
     return Scaffold(
@@ -191,14 +191,22 @@ class _MainWrapperState extends State<MainWrapper> {
 
   FloatingActionButton _mainWrappedFab(BuildContext context) {
     return FloatingActionButton(
-      onPressed: () {
-        BlocProvider.of<BottomNavCubit>(context).changeSelectedIndex(4);
-        pageController.animateToPage(
-          4,
-          duration: const Duration(milliseconds: 10),
-          curve: Curves.fastLinearToSlowEaseIn,
-        );
-      },
+     onPressed: () {
+          Navigator.of(context).push(
+            PageRouteBuilder(
+              opaque: false,
+              pageBuilder: (_, __, ___) => CriarPage(user: widget.user),
+              transitionsBuilder: (_, anim, __, child) => SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 1),
+                  end: Offset.zero,
+                ).animate(anim),
+                child: child,
+              ),
+            ),
+          );
+        },
+
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
       backgroundColor: const Color(0xFFFFCC00),
       child: const Icon(Icons.add, size: 30),
