@@ -128,6 +128,49 @@ class UberGroupDetailPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
+                if (!isOwner && isMember)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Botão "Sair"
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Confirmar saída'),
+                              content: const Text('Você tem certeza que deseja sair da carona?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(false),
+                                  child: const Text('Cancelar'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(true),
+                                  child: const Text('Sair'),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirm == true) {
+                            final docRef = FirebaseFirestore.instance.collection('caronas').doc(groupId);
+                            await docRef.update({
+                              'members': FieldValue.arrayRemove([user.uid]),
+                            });
+                            Navigator.pop(context); // volta pra tela anterior
+                          }
+                        },
+                        icon: const Icon(Icons.exit_to_app),
+                        label: const Text('Sair'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 16),
                 if (!isOwner && !isMember)
                   SizedBox(
                     width: double.infinity,
@@ -148,6 +191,7 @@ class UberGroupDetailPage extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: 24),
+                // Lista de membros
                 if (members.isNotEmpty)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,22 +209,62 @@ class UberGroupDetailPage extends StatelessWidget {
                         runSpacing: 12,
                         children: members.map<Widget>((memberId) {
                           final bool isCurrent = memberId == user.uid;
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CircleAvatar(
-                                radius: 20,
-                                child: Text(
-                                  isCurrent ? 'Você' : memberId.substring(0, 2).toUpperCase(),
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                isCurrent ? 'Você' : memberId,
-                                style: GoogleFonts.montserrat(fontSize: 12),
-                              ),
-                            ],
+                          return FutureBuilder<DocumentSnapshot>(
+                            future: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(memberId)
+                                .get(),
+                            builder: (context, snapUser) {
+                              Widget avatar;
+                              String label;                              
+                              if (isCurrent) {
+                                avatar = const CircleAvatar(
+                                  radius: 20,
+                                  child: Icon(Icons.person, size: 20),
+                                );
+                                label = "Você";
+                              } else if (snapUser.connectionState == ConnectionState.waiting) {
+                                avatar = const CircleAvatar(
+                                  radius: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                );
+                                label = "";
+                              } else if (!snapUser.hasData || !snapUser.data!.exists) {
+                                avatar = CircleAvatar(
+                                  radius: 20,
+                                  child: Text(
+                                    memberId.substring(0, 2).toUpperCase(),
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                );
+                                label = memberId;
+                              } else {
+                                final userData = snapUser.data!.data() as Map<String, dynamic>;
+                                final name = userData['displayName'] ?? memberId;
+                                final photo = userData['photoURL'] as String? ?? '';
+                                avatar = CircleAvatar(
+                                  radius: 20,
+                                  backgroundImage:
+                                      photo.isNotEmpty ? NetworkImage(photo) : null,
+                                  child: photo.isEmpty
+                                      ? Text(
+                                          name.substring(0, 1).toUpperCase(),
+                                          style: const TextStyle(fontSize: 12),
+                                        )
+                                      : null,
+                                );
+                                label = name;
+                              }
+                              
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  avatar,
+                                  const SizedBox(height: 4),
+                                  Text(label, style: GoogleFonts.montserrat(fontSize: 12)),
+                                ],
+                              );
+                            },
                           );
                         }).toList(),
                       ),
