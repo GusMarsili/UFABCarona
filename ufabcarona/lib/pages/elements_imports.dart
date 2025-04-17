@@ -283,26 +283,37 @@ class UberCard extends Cards {
 
 class TextFieldElement {
   final String labelText;
+  final bool showSearchIcon;
+  final bool haveController;
+  final TextEditingController? controller;
+  final void Function(String)? onChanged;
 
-  TextFieldElement({required this.labelText});
+  TextFieldElement({
+    required this.labelText,
+    this.showSearchIcon = false,
+    this.haveController = false,
+    this.controller,
+    this.onChanged,
+  });
 
   Widget build(BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.9,
       child: TextField(
+        controller: haveController ? controller : null,
+        onChanged: onChanged,
         decoration: InputDecoration(
           labelText: labelText,
           labelStyle: TextStyle(color: Colors.grey),
           filled: true,
           fillColor: Colors.grey[200],
+          prefixIcon:
+              showSearchIcon ? Icon(Icons.search, color: Colors.grey) : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
             borderSide: BorderSide.none,
           ),
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 16,
-          ), // Espaçamento interno
+          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
       ),
     );
