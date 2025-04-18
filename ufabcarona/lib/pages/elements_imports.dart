@@ -33,10 +33,10 @@ class AppBarScreen {
   }
 }
 
-String _getFirstTwoNames(String? name) {
+String _getFirstName(String? name) {
   if (name == null || name.isEmpty) return 'N/I';
   List<String> parts = name.trim().split(' ');
-  return parts.length >= 2 ? '${parts[0]} ${parts[1]}' : parts[0];
+  return parts.length >= 2 ? '${parts[0]} ' : parts[0];
 }
 
 
@@ -53,6 +53,7 @@ abstract class Cards {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontFamily: 'Montserrat',
+              fontSize: 18,
             ),
           ),
           SizedBox(width: 8),
@@ -63,6 +64,7 @@ abstract class Cards {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontFamily: 'Montserrat',
+              fontSize: 18,
             ),
           ),
         ],
@@ -73,7 +75,7 @@ abstract class Cards {
   Widget horario() {
     return Row(
       children: [
-        Icon(Icons.access_time, size: 16),
+        Icon(Icons.access_time, size: 25), //access_time
         SizedBox(width: 4),
         Text(
           data['horario'] ?? 'N/I',
@@ -87,31 +89,38 @@ abstract class Cards {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(Icons.person, size: 16),
+        Icon(Icons.person, size: 25),
         SizedBox(width: 4),
         Text(
-          "${data['vagas'] ?? 'N/I'}",
-          style: TextStyle(fontFamily: 'Montserrat'),
+          "${data['vagas'] ?? 'N/I'} vagas",
+          style: TextStyle(fontFamily: 'Montserrat', fontSize: 18),
         ),
         SizedBox(width: 16),
-        Icon(Icons.location_on, size: 16),
+        Icon(Icons.location_on, size: 25),
         SizedBox(width: 4),
         Text(
           data['pontoEncontro'] ?? 'N/I',
-          style: TextStyle(fontFamily: 'Montserrat'),
+          style: TextStyle(fontFamily: 'Montserrat', fontSize: 18),
         ),
       ],
     );
   }
 
+  
+
   Widget botao(String textoBotao, void Function()? funcaoBotao) {
-    return SizedBox(
-      width: double.infinity,
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: SizedBox(
+      width: 160, //double.infinity,
+      height: 30,
       child: ElevatedButton(
+        
         onPressed: funcaoBotao,
         style: ElevatedButton.styleFrom(
+          
           backgroundColor: Colors.amber,
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -125,20 +134,22 @@ abstract class Cards {
           ),
         ),
       ),
+    ),
     );
+    
   }
 
   Widget foto() {
     return CircleAvatar(
-      radius: 24,
+      radius: 28,
       backgroundColor: Colors.grey.shade200,
       child:
           data['creatorPhotoURL'] != null && data['creatorPhotoURL'].isNotEmpty
               ? ClipOval(
                 child: CachedNetworkImage(
                   imageUrl: data['creatorPhotoURL'],
-                  width: 48,
-                  height: 48,
+                  width: 55,
+                  height: 55,
                   fit: BoxFit.cover,
                   placeholder:
                       (context, url) =>
@@ -163,73 +174,90 @@ class CaronaCard extends Cards {
     BuildContext context,
   ) {
     return Card(
-      color: Colors.white,
+      color: Color(0xFFFBFBFB),
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      margin: const EdgeInsets.all(12),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            letreiro(),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Informações da viagem
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 8),
-                      // Horário
-                      horario(),
-                      const SizedBox(height: 8),
-                      encontro(),
-                    ],
-                  ),
-                ),
-                // Foto e nome
-                Column(
+      margin: const EdgeInsets.symmetric(horizontal: 25,vertical: 15), 
+      child: SizedBox(
+        height: 180,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 18), 
+
+          child: Column(
+            children: [
+              letreiro(),
+              SizedBox(height: 10),
+              Expanded(
+                child: Row(
+                  //crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    foto(),
-                    SizedBox(height: 8),
-                    Text(
-                      _getFirstTwoNames(data['creatorName']),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Montserrat',
+                    // Informações da viagem                 
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [                          
+                          horario(),  
+                          SizedBox(height: 10),                        
+                          encontro(),
+                        ],
                       ),
+                    
+                    //SizedBox(width: 16),
+                    // Foto e nome
+                    Flexible(
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            foto(),
+                            //SizedBox(height: 4),
+                            
+                               Text(
+                                _getFirstName(data['creatorName']),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontFamily: 'Montserrat',
+                                  fontSize: 5,
+                                ),
+                              ),
+                            
+                            
+                            
+                              Text(
+                                "R\$ ${data['valor'] ?? 'N/I'}",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontFamily: 'Montserrat',
+                                  fontSize: 20,
+                                ),
+                              ),
+                            
+                          ],
+                        ),
                     ),
-                    SizedBox(height: 4),
-                    Text(
-                      "R\$ ${data['valor'] ?? 'N/I'}",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Montserrat',
-                      ),
-                    ),
+                    
                   ],
                 ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Botão Reservar
-            botao("Reservar", () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (context) => CaronaDetailPage(
-                        user: user,
-                        rideId: documentId,
-                        isOwner: isOwner,
-                      ),
-                ),
-              );
-            }),
-          ],
+              ),
+        
+              SizedBox(height: 10),
+        
+              // Botão Reservar
+              botao("Reservar", () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) => CaronaDetailPage(
+                          user: user,
+                          rideId: documentId,
+                          isOwner: isOwner,
+                        ),
+                  ),
+                );
+              }),
+            ],
+          ),
         ),
       ),
     );
@@ -245,7 +273,7 @@ class UberCard extends Cards {
     BuildContext context,
     ) {
     return Card(
-      color: Colors.white,
+      color: Color(0xFFFBFBFB),
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.all(12),
