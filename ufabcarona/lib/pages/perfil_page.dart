@@ -7,6 +7,17 @@ class PerfilPage extends StatelessWidget {
   final User user;
   const PerfilPage({super.key, required this.user});
 
+  String _getFirstTwoNames(String? fullName) {
+  if (fullName == null || fullName.isEmpty) return '';
+  List<String> parts = fullName.trim().split(' ');
+  if (parts.length >= 2) {
+    return '${parts[0]} ${parts[1]}'; //pega apenas os 2 primeiros nomes do user
+  } else {
+    return parts[0]; // Retorna só o primeiro se não houver dois
+  }
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +46,7 @@ class PerfilPage extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              "Olá, ${user.displayName}!",
+              "Olá, ${_getFirstTwoNames(user.displayName)}!",
               style: GoogleFonts.montserrat(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
