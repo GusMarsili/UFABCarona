@@ -1,10 +1,10 @@
+import 'package:google_fonts/google_fonts.dart';
+
 import 'carona_detail_page.dart';
 import 'uber_group_detail_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 
 class AppBarScreen {
   AppBar build() {
@@ -32,6 +32,13 @@ class AppBarScreen {
     );
   }
 }
+
+String _getFirstTwoNames(String? name) {
+  if (name == null || name.isEmpty) return 'N/I';
+  List<String> parts = name.trim().split(' ');
+  return parts.length >= 2 ? '${parts[0]} ${parts[1]}' : parts[0];
+}
+
 
 abstract class Cards {
   final Map<String, dynamic> data;
@@ -187,7 +194,7 @@ class CaronaCard extends Cards {
                     foto(),
                     SizedBox(height: 8),
                     Text(
-                      data['creatorName'] ?? 'N/I',
+                      _getFirstTwoNames(data['creatorName']),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Montserrat',
