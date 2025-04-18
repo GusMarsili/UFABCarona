@@ -7,23 +7,26 @@ import 'package:cached_network_image/cached_network_image.dart';
 class AppBarScreen {
   AppBar build() {
     return AppBar(
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       centerTitle: true,
       title: Row(
+      
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset('lib/images/logoUFABCarona.png', height: 60),
-          SizedBox(width: 1),
+          Image.asset(
+            'lib/images/logo-degrade.png',
+            height: 50,
+          ),
           Text(
             "UFABCarona",
-            style: TextStyle(
-              fontFamily: "Poppins",
-              fontSize: 20,
+            style: GoogleFonts.poppins(
               color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
       ),
-      backgroundColor: Colors.white,
     );
   }
 }
