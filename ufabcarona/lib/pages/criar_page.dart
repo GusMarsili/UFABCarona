@@ -13,6 +13,7 @@ class CriarPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: _BodyScreen(user: user).build(context),
+      appBar: AppBarScreen().build(),
     );
   }
 }
