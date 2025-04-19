@@ -53,7 +53,7 @@ abstract class Cards {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontFamily: 'Montserrat',
-              fontSize: 18,
+              fontSize: 15,
             ),
           ),
           SizedBox(width: 8),
@@ -64,7 +64,7 @@ abstract class Cards {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontFamily: 'Montserrat',
-              fontSize: 18,
+              fontSize: 15,
             ),
           ),
         ],
@@ -75,11 +75,11 @@ abstract class Cards {
   Widget horario() {
     return Row(
       children: [
-        Icon(Icons.access_time, size: 25), //access_time
+        Icon(Icons.access_time, size: 20), //access_time
         SizedBox(width: 4),
         Text(
           data['horario'] ?? 'N/I',
-          style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
+          style: const TextStyle(fontSize: 15, fontFamily: 'Montserrat'),
         ),
       ],
     );
@@ -89,18 +89,18 @@ abstract class Cards {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(Icons.person, size: 25),
+        Icon(Icons.person, size: 20),
         SizedBox(width: 4),
         Text(
           "${data['vagas'] ?? 'N/I'} vagas",
-          style: TextStyle(fontFamily: 'Montserrat', fontSize: 18),
+          style: TextStyle(fontFamily: 'Montserrat', fontSize: 15),
         ),
         SizedBox(width: 16),
-        Icon(Icons.location_on, size: 25),
+        Icon(Icons.location_on, size: 20),
         SizedBox(width: 4),
         Text(
           data['pontoEncontro'] ?? 'N/I',
-          style: TextStyle(fontFamily: 'Montserrat', fontSize: 18),
+          style: TextStyle(fontFamily: 'Montserrat', fontSize: 15),
         ),
       ],
     );
@@ -112,7 +112,7 @@ abstract class Cards {
     return Align(
       alignment: Alignment.centerLeft,
       child: SizedBox(
-      width: 160, //double.infinity,
+      width: 245, //double.infinity,
       height: 30,
       child: ElevatedButton(
         
@@ -141,15 +141,15 @@ abstract class Cards {
 
   Widget foto() {
     return CircleAvatar(
-      radius: 28,
+      radius: 23,
       backgroundColor: Colors.grey.shade200,
       child:
           data['creatorPhotoURL'] != null && data['creatorPhotoURL'].isNotEmpty
               ? ClipOval(
                 child: CachedNetworkImage(
                   imageUrl: data['creatorPhotoURL'],
-                  width: 55,
-                  height: 55,
+                  width: 50,
+                  height: 50,
                   fit: BoxFit.cover,
                   placeholder:
                       (context, url) =>
@@ -177,85 +177,89 @@ class CaronaCard extends Cards {
       color: Color(0xFFFBFBFB),
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      margin: const EdgeInsets.symmetric(horizontal: 25,vertical: 15), 
+      margin: const EdgeInsets.symmetric(horizontal: 25,vertical: 5), 
       child: SizedBox(
-        height: 180,
+        height: 165,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 18), 
 
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               letreiro(),
-              SizedBox(height: 10),
+              
               Expanded(
                 child: Row(
-                  //crossAxisAlignment: CrossAxisAlignment.start,
+                  
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Informações da viagem                 
+                    // Informações da viagem  
+                                   
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [                          
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [ 
+                                                   
                           horario(),  
-                          SizedBox(height: 10),                        
+                                                  
                           encontro(),
                         ],
                       ),
                     
-                    //SizedBox(width: 16),
+                    
                     // Foto e nome
-                    Flexible(
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            foto(),
-                            //SizedBox(height: 4),
-                            
+                    
+                       Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          
+                          children: [  
+                                                                                   
+                               foto(),
+                                                         
                                Text(
                                 _getFirstName(data['creatorName']),
                                 style: TextStyle(
                                   fontWeight: FontWeight.normal,
                                   fontFamily: 'Montserrat',
-                                  fontSize: 5,
+                                  fontSize: 15,
                                 ),
-                              ),
-                            
-                            
-                            
-                              Text(
-                                "R\$ ${data['valor'] ?? 'N/I'}",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  fontFamily: 'Montserrat',
-                                  fontSize: 20,
-                                ),
-                              ),
+                              ),                                                        
                             
                           ],
                         ),
-                    ),
+                    
                     
                   ],
                 ),
               ),
-        
-              SizedBox(height: 10),
-        
               // Botão Reservar
-              botao("Reservar", () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => CaronaDetailPage(
-                          user: user,
-                          rideId: documentId,
-                          isOwner: isOwner,
-                        ),
-                  ),
-                );
-              }),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  botao("Reservar", () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => CaronaDetailPage(
+                              user: user,
+                              rideId: documentId,
+                              isOwner: isOwner,
+                            ),
+                      ),
+                    );
+                  }),
+                  Text(
+                       "R\$ ${data['valor'] ?? 'N/I'}",
+                       style: TextStyle(
+                         fontWeight: FontWeight.normal,
+                         fontFamily: 'Montserrat',
+                         fontSize: 20,
+                       ),
+                     ),
+                ],
+              ),
             ],
           ),
         ),
