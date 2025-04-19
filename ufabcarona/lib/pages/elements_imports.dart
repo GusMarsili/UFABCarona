@@ -108,11 +108,11 @@ abstract class Cards {
 
   
 
-  Widget botao(String textoBotao, void Function()? funcaoBotao) {
+  Widget botao(String textoBotao,double sizeWidth, void Function()? funcaoBotao) {
     return Align(
       alignment: Alignment.centerLeft,
       child: SizedBox(
-      width: 245, //double.infinity,
+      width: sizeWidth, //double.infinity,245
       height: 30,
       child: ElevatedButton(
         
@@ -237,7 +237,7 @@ class CaronaCard extends Cards {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  botao("Reservar", () {
+                  botao("Reservar",245, () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -293,6 +293,7 @@ class UberCard extends Cards {
                 Expanded(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
+                    
                     children: [
                       const SizedBox(height: 16),
                       // Horário
@@ -305,7 +306,7 @@ class UberCard extends Cards {
               ],
             ),
             const SizedBox(height: 16),
-            botao("Participar", () {
+            botao("Participar",double.infinity, () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
