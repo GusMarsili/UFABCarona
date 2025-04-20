@@ -154,7 +154,7 @@ class UberGroupDetailPage extends StatelessWidget {
                           );
 
                           if (confirm == true) {
-                            final docRef = FirebaseFirestore.instance.collection('caronas').doc(groupId);
+                            final docRef = FirebaseFirestore.instance.collection('uberGroups').doc(groupId);
                             await docRef.update({
                               'members': FieldValue.arrayRemove([user.uid]),
                             });
@@ -192,85 +192,43 @@ class UberGroupDetailPage extends StatelessWidget {
                   ),
                 const SizedBox(height: 24),
                 // Lista de membros
-                if (members.isNotEmpty)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Membros:",
-                        style: GoogleFonts.montserrat(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: members.map<Widget>((memberId) {
-                          final bool isCurrent = memberId == user.uid;
-                          return FutureBuilder<DocumentSnapshot>(
-                            future: FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(memberId)
-                                .get(),
-                            builder: (context, snapUser) {
-                              Widget avatar;
-                              String label;                              
-                              if (isCurrent) {
-                                avatar = const CircleAvatar(
-                                  radius: 20,
-                                  child: Icon(Icons.person, size: 20),
-                                );
-                                label = "Você";
-                              } else if (snapUser.connectionState == ConnectionState.waiting) {
-                                avatar = const CircleAvatar(
-                                  radius: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                );
-                                label = "";
-                              } else if (!snapUser.hasData || !snapUser.data!.exists) {
-                                avatar = CircleAvatar(
-                                  radius: 20,
-                                  child: Text(
-                                    memberId.substring(0, 2).toUpperCase(),
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                );
-                                label = memberId;
-                              } else {
-                                final userData = snapUser.data!.data() as Map<String, dynamic>;
-                                final name = userData['displayName'] ?? memberId;
-                                final photo = userData['photoURL'] as String? ?? '';
-                                avatar = CircleAvatar(
-                                  radius: 20,
-                                  backgroundImage:
-                                      photo.isNotEmpty ? NetworkImage(photo) : null,
-                                  child: photo.isEmpty
-                                      ? Text(
-                                          name.substring(0, 1).toUpperCase(),
-                                          style: const TextStyle(fontSize: 12),
-                                        )
-                                      : null,
-                                );
-                                label = name;
-                              }
-                              
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  avatar,
-                                  const SizedBox(height: 4),
-                                  Text(label, style: GoogleFonts.montserrat(fontSize: 12)),
-                                ],
-                              );
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    ],
+                if (members.isNotEmpty) ...[
+                  Text(
+                    "Membros:",
+                    style: GoogleFonts.montserrat(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                const SizedBox(height: 24),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: members.map((memberId) {
+                      final bool isCurrent = memberId == user.uid;
+                      final String label = isCurrent ? 'Você' : memberId;
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor: Colors.grey.shade200,
+                            child: Text(
+                              isCurrent ? '😊' : memberId.substring(0, 2).toUpperCase(),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            label,
+                            style: GoogleFonts.montserrat(fontSize: 12),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+                ],
                 if (isOwner)
                   Align(
                     alignment: Alignment.centerRight,

@@ -7,7 +7,7 @@ import 'uber_group_detail_page.dart';
 
 class ReservasPage extends StatelessWidget {
   final User user;
-  const ReservasPage({Key? key, required this.user}) : super(key: key);
+  const ReservasPage({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
