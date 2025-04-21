@@ -86,7 +86,7 @@ class _CaronaFormsState extends State<CaronaForms> {
           'placa': _placaController.text,
           'valor': _valorController.text,
           'paradas': _paradasController.text,
-          'members': <String>[], // Novo campo para reservas
+          'members': <String>[],
           'timestamp': FieldValue.serverTimestamp(),
         });
         ScaffoldMessenger.of(context).showSnackBar(

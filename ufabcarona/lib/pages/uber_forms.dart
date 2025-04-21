@@ -63,7 +63,7 @@ class _UberFormsState extends State<UberForms> {
           'destino': _destinoController.text,
           'horario': _horarioController.text,
           'pontoEncontro': _pontoEncontroController.text,
-          'members': <String>[], // Novo campo para reservas
+          'members': <String>[],
           'timestamp': FieldValue.serverTimestamp(),
         });
         ScaffoldMessenger.of(context).showSnackBar(

@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'uber_forms.dart';
 
-class UberGroupDetailPage extends StatelessWidget {
+class UberGroupDetailPage extends StatefulWidget {
   final User user;
   final String groupId;
   final bool isOwner;
@@ -16,6 +16,51 @@ class UberGroupDetailPage extends StatelessWidget {
     required this.isOwner,
   });
 
+  State<UberGroupDetailPage> createState() => _UberGroupDetailPage();
+}
+
+class _UberGroupDetailPage extends State<UberGroupDetailPage> {
+
+  // Muda o status da carona no Firestore
+  Future<void> _groupStatus(String status) async {
+    await FirebaseFirestore.instance
+        .collection('uberGroups')
+        .doc(widget.groupId)
+        .update({'status': status});
+  }
+
+  // Confirma e finaliza a corrida (deleta o documento)
+  Future<void> _finishGroup(BuildContext context) async {
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Finalizar Corrida"),
+        content: const Text("Deseja encerrar esta corrida?"),
+        actions: [
+          TextButton(
+            child: const Text("Cancelar"),
+            onPressed: () => Navigator.of(ctx).pop(false),
+          ),
+          TextButton(
+            child: const Text("Finalizar", style: TextStyle(color: Colors.red)),
+            onPressed: () => Navigator.of(ctx).pop(true),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      await FirebaseFirestore.instance
+          .collection('uberGroups')
+          .doc(widget.groupId)
+          .delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Corrida finalizada com sucesso!")),
+      );
+      Navigator.of(context).pop(); // volta para a lista
+    }
+  }
+
+  // Apresenta um diálogo de confirmação e deleta o documento se confirmado.
   Future<void> _deleteUberGroup(BuildContext context) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -36,7 +81,7 @@ class UberGroupDetailPage extends StatelessWidget {
     );
 
     if (confirm == true) {
-      await FirebaseFirestore.instance.collection('uberGroups').doc(groupId).delete();
+      await FirebaseFirestore.instance.collection('uberGroups').doc(widget.groupId).delete();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Grupo Uber excluído com sucesso")),
       );
@@ -63,7 +108,7 @@ class UberGroupDetailPage extends StatelessWidget {
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('uberGroups')
-            .doc(groupId)
+            .doc(widget.groupId)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -79,7 +124,8 @@ class UberGroupDetailPage extends StatelessWidget {
           }
           final data = snapshot.data!.data() as Map<String, dynamic>;
           final List<dynamic> members = data['members'] ?? [];
-          final bool isMember = members.contains(user.uid);
+          final bool isMember = members.contains(widget.user.uid);
+          final bool isRunning = data['status'] == 'running';
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -128,7 +174,8 @@ class UberGroupDetailPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
-                if (!isOwner && isMember)
+                // Botão Sair (para membro)
+                if (!widget.isOwner && isMember)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -154,9 +201,9 @@ class UberGroupDetailPage extends StatelessWidget {
                           );
 
                           if (confirm == true) {
-                            final docRef = FirebaseFirestore.instance.collection('uberGroups').doc(groupId);
+                            final docRef = FirebaseFirestore.instance.collection('uberGroups').doc(widget.groupId);
                             await docRef.update({
-                              'members': FieldValue.arrayRemove([user.uid]),
+                              'members': FieldValue.arrayRemove([widget.user.uid]),
                             });
                             Navigator.pop(context); // volta pra tela anterior
                           }
@@ -171,16 +218,17 @@ class UberGroupDetailPage extends StatelessWidget {
                     ],
                   ),
                 const SizedBox(height: 16),
-                if (!isOwner && !isMember)
+                // Botão Reservar
+                if (!widget.isOwner && !isMember)
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
                         await FirebaseFirestore.instance
                             .collection('uberGroups')
-                            .doc(groupId)
+                            .doc(widget.groupId)
                             .update({
-                          'members': FieldValue.arrayUnion([user.uid]),
+                          'members': FieldValue.arrayUnion([widget.user.uid]),
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -205,7 +253,7 @@ class UberGroupDetailPage extends StatelessWidget {
                     spacing: 12,
                     runSpacing: 12,
                     children: members.map((memberId) {
-                      final bool isCurrent = memberId == user.uid;
+                      final bool isCurrent = memberId == widget.user.uid;
                       final String label = isCurrent ? 'Você' : memberId;
                       return Column(
                         mainAxisSize: MainAxisSize.min,
@@ -229,7 +277,8 @@ class UberGroupDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                 ],
-                if (isOwner)
+                // Botões de ação para o criador (editar/deletar)
+                if (widget.isOwner)
                   Align(
                     alignment: Alignment.centerRight,
                     child: Row(
@@ -242,9 +291,9 @@ class UberGroupDetailPage extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => UberForms(
-                                  user: user,
+                                  user: widget.user,
                                   groupData: data,
-                                  groupId: groupId,
+                                  groupId: widget.groupId,
                                 ),
                               ),
                             );
@@ -258,6 +307,51 @@ class UberGroupDetailPage extends StatelessWidget {
                       ],
                     ),
                   ),
+                // Botão "Começar Corrida" (para o criador)
+                if (widget.isOwner && !isRunning) ...[
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => _groupStatus('running'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text("Começar Corrida"),
+                    ),
+                  ),
+                ],
+                // Indicador e botões "Finalizar" / "Voltar"
+                if (widget.isOwner && isRunning) ...[
+                  const SizedBox(height: 24),
+                  Text(
+                    "Corrida em andamento",
+                    style: GoogleFonts.montserrat(
+                      color: Colors.amber,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => _finishGroup(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text("Finalizar Corrida"),
+                      ),
+                      OutlinedButton(
+                        onPressed: () => _groupStatus('not running'),
+                        child: const Text("Voltar"),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           );

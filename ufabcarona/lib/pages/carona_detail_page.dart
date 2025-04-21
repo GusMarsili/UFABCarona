@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'carona_forms.dart';
 
-class CaronaDetailPage extends StatelessWidget {
+class CaronaDetailPage extends StatefulWidget {
   final User user;
   final String rideId;
   final bool isOwner;
@@ -15,6 +15,51 @@ class CaronaDetailPage extends StatelessWidget {
     required this.rideId,
     required this.isOwner,
   });
+
+  @override
+  State<CaronaDetailPage> createState() => _CaronaDetailPageState();
+}
+
+class _CaronaDetailPageState extends State<CaronaDetailPage> {
+
+  // Muda o status da carona no Firestore
+  Future<void> _rideStatus(String status) async {
+    await FirebaseFirestore.instance
+        .collection('rides')
+        .doc(widget.rideId)
+        .update({'status': status});
+  }
+
+  // Confirma e finaliza a corrida (deleta o documento)
+  Future<void> _finishRide(BuildContext context) async {
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Finalizar Corrida"),
+        content: const Text("Deseja encerrar esta corrida?"),
+        actions: [
+          TextButton(
+            child: const Text("Cancelar"),
+            onPressed: () => Navigator.of(ctx).pop(false),
+          ),
+          TextButton(
+            child: const Text("Finalizar", style: TextStyle(color: Colors.red)),
+            onPressed: () => Navigator.of(ctx).pop(true),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      await FirebaseFirestore.instance
+          .collection('rides')
+          .doc(widget.rideId)
+          .delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Corrida finalizada com sucesso!")),
+      );
+      Navigator.of(context).pop(); // volta para a lista
+    }
+  }
 
   // Apresenta um diálogo de confirmação e deleta o documento se confirmado.
   Future<void> _deleteRide(BuildContext context) async {
@@ -38,7 +83,7 @@ class CaronaDetailPage extends StatelessWidget {
     if (confirm == true) {
       await FirebaseFirestore.instance
           .collection('rides')
-          .doc(rideId)
+          .doc(widget.rideId)
           .delete();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Carona deletada com sucesso!")),
@@ -66,7 +111,7 @@ class CaronaDetailPage extends StatelessWidget {
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('rides')
-            .doc(rideId)
+            .doc(widget.rideId)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -85,7 +130,8 @@ class CaronaDetailPage extends StatelessWidget {
           final List<dynamic> members = data['members'] ?? [];
           final int vagas = data['vagas'] ?? 0;
           final bool hasSlot = members.length < vagas;
-          final bool isMember = members.contains(user.uid);
+          final bool isMember = members.contains(widget.user.uid);
+          final bool isRunning = data['status'] == 'running';
           
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -164,11 +210,11 @@ class CaronaDetailPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
-                if (!isOwner && isMember)
+                // Botão Sair (para membro)
+                if (!widget.isOwner && isMember)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Botão "Sair"
+                    children: [              
                       ElevatedButton.icon(
                         onPressed: () async {
                           final confirm = await showDialog<bool>(
@@ -190,9 +236,9 @@ class CaronaDetailPage extends StatelessWidget {
                           );
 
                           if (confirm == true) {
-                            final docRef = FirebaseFirestore.instance.collection('rides').doc(rideId);
+                            final docRef = FirebaseFirestore.instance.collection('rides').doc(widget.rideId);
                             await docRef.update({
-                              'members': FieldValue.arrayRemove([user.uid]),
+                              'members': FieldValue.arrayRemove([widget.user.uid]),
                             });
                             Navigator.pop(context); // volta pra tela anterior
                           }
@@ -208,16 +254,16 @@ class CaronaDetailPage extends StatelessWidget {
                   ),
                 const SizedBox(height: 16),
                 // Botão Reservar
-                if (!isOwner && !isMember && hasSlot)
+                if (!widget.isOwner && !isMember && hasSlot)
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
                         await FirebaseFirestore.instance
                             .collection('rides')
-                            .doc(rideId)
+                            .doc(widget.rideId)
                             .update({
-                          'members': FieldValue.arrayUnion([user.uid]),
+                          'members': FieldValue.arrayUnion([widget.user.uid]),
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -242,7 +288,7 @@ class CaronaDetailPage extends StatelessWidget {
                     spacing: 12,
                     runSpacing: 12,
                     children: members.map((memberId) {
-                      final bool isCurrent = memberId == user.uid;
+                      final bool isCurrent = memberId == widget.user.uid;
                       final String label = isCurrent ? 'Você' : memberId;
                       return Column(
                         mainAxisSize: MainAxisSize.min,
@@ -266,8 +312,8 @@ class CaronaDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                 ],
-                // Botões de ação para o criador
-                if (isOwner)
+                // Botões de ação para o criador (editar/deletar)
+                if (widget.isOwner)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -295,9 +341,9 @@ class CaronaDetailPage extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => CaronaForms(
-                                user: user,
+                                user: widget.user,
                                 rideData: data,
-                                rideId: rideId,
+                                rideId: widget.rideId,
                               ),
                             ),
                           );
@@ -305,6 +351,51 @@ class CaronaDetailPage extends StatelessWidget {
                       ),
                     ],
                   ),
+                // Botão "Começar Corrida" (para o criador)
+                if (widget.isOwner && !isRunning) ...[
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => _rideStatus('running'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text("Começar Corrida"),
+                    ),
+                  ),
+                ],
+                // Indicador e botões "Finalizar" / "Voltar"
+                if (widget.isOwner && isRunning) ...[
+                  const SizedBox(height: 24),
+                  Text(
+                    "Corrida em andamento",
+                    style: GoogleFonts.montserrat(
+                      color: Colors.amber,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => _finishRide(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text("Finalizar Corrida"),
+                      ),
+                      OutlinedButton(
+                        onPressed: () => _rideStatus('not running'),
+                        child: const Text("Voltar"),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           );
