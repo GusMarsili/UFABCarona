@@ -6,7 +6,7 @@ import 'elements_imports.dart';
 
 class CaronasPage extends StatefulWidget {
   final User user;
-  final bool mostrarFiltros = false;
+  final bool mostrarFiltros = true;
 
   const CaronasPage({super.key, required this.user});
 
