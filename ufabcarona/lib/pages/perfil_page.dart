@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'historico_page.dart';
 
 class PerfilPage extends StatelessWidget {
   final User user;
@@ -16,7 +17,6 @@ class PerfilPage extends StatelessWidget {
     return parts[0]; // Retorna só o primeiro se não houver dois
   }
 }
-
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +69,12 @@ class PerfilPage extends StatelessWidget {
                 height: MediaQuery.of(context).size.height * 0.06,
                 child: ElevatedButton(
                   onPressed: ()  {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => HistoricoPage(),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFBFBFB),

@@ -1,10 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'carona_detail_page.dart';
 import 'uber_group_detail_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:cached_network_image/cached_network_image.dart';
 
 class AppBarScreen {
   AppBar build() {
@@ -38,7 +38,6 @@ String _getFirstName(String? name) {
   List<String> parts = name.trim().split(' ');
   return parts.length >= 2 ? '${parts[0]} ' : parts[0];
 }
-
 
 abstract class Cards {
   final Map<String, dynamic> data;
@@ -106,8 +105,6 @@ abstract class Cards {
     );
   }
 
-  
-
   Widget botao(String textoBotao,double sizeWidth, void Function()? funcaoBotao) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -136,30 +133,49 @@ abstract class Cards {
       ),
     ),
     );
-    
   }
 
-  Widget foto() {
-    return CircleAvatar(
-      radius: 23,
-      backgroundColor: Colors.grey.shade200,
-      child:
-          data['creatorPhotoURL'] != null && data['creatorPhotoURL'].isNotEmpty
-              ? ClipOval(
-                child: CachedNetworkImage(
-                  imageUrl: data['creatorPhotoURL'],
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.cover,
-                  placeholder:
-                      (context, url) =>
-                          const CircularProgressIndicator(strokeWidth: 2),
-                  errorWidget:
-                      (context, url, error) =>
-                          const Icon(Icons.person, size: 20),
-                ),
-              )
-              : const Icon(Icons.person, size: 20),
+  Widget foto(String creatorId) {
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance
+          .collection('users')
+          .doc(creatorId)
+          .get(),
+      builder: (context, snapUser) {
+        // Enquanto carrega, mostra um placeholder
+        if (snapUser.connectionState == ConnectionState.waiting) {
+          return CircleAvatar(
+            radius: 23,
+            backgroundColor: Colors.grey.shade200,
+            child: const CircularProgressIndicator(strokeWidth: 2),
+          );
+        }
+        // Se não existir, mostra ícone genérico
+        if (!snapUser.hasData || !snapUser.data!.exists) {
+          return CircleAvatar(
+            radius: 23,
+            backgroundColor: Colors.grey.shade200,
+            child: const Icon(Icons.person, size: 20),
+          );
+        }
+        // Se encontrou, usa o campo photoURL do doc user
+        final userData = snapUser.data!.data() as Map<String, dynamic>;
+        final photoUrl = userData['photoURL'] as String? ?? '';
+        return CircleAvatar(
+          radius: 23,
+          backgroundColor: Colors.grey.shade200,
+          backgroundImage:
+              photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
+          child: photoUrl.isEmpty
+              ? Text(
+                  (userData['displayName'] as String? ?? '')
+                      .substring(0, 1)
+                      .toUpperCase(),
+                  style: const TextStyle(fontSize: 12),
+                )
+              : null,
+        );
+      },
     );
   }
 }
@@ -215,21 +231,36 @@ class CaronaCard extends Cards {
                           
                           children: [  
                                                                                    
-                               foto(),
+                               foto(data['creatorId']),
                                                          
-                               Text(
-                                _getFirstName(data['creatorName']),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  fontFamily: 'Montserrat',
-                                  fontSize: 15,
+                               FutureBuilder<DocumentSnapshot>(
+                                  future: FirebaseFirestore.instance
+                                      .collection('users')
+                                      .doc(data['creatorId'])
+                                      .get(),
+                                  builder: (context, snapUser) {
+                                    String firstName = '';
+                                    if (snapUser.connectionState == ConnectionState.waiting) {
+                                      firstName = 'Carregando...'; 
+                                    } else if (snapUser.hasData && snapUser.data!.exists) {
+                                      final userData = snapUser.data!.data() as Map<String, dynamic>;
+                                      final fullName = userData['displayName'] as String? ?? '';
+                                      firstName = _getFirstName(fullName);
+                                    } else {
+                                      firstName = 'N/I';
+                                    }
+                                    return Text(
+                                      firstName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.normal,
+                                        fontFamily: 'Montserrat',
+                                        fontSize: 15,
+                                      ),
+                                    );
+                                  },
                                 ),
-                              ),                                                        
-                            
                           ],
-                        ),
-                    
-                    
+                        ),                                        
                   ],
                 ),
               ),

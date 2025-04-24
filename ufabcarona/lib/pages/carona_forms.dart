@@ -73,9 +73,7 @@ class _CaronaFormsState extends State<CaronaForms> {
       if (widget.rideData == null) {
         await FirebaseFirestore.instance.collection('rides').add({
           'creatorId': widget.user.uid,
-          'creatorName': widget.user.displayName,
-          'creatorEmail': widget.user.email,
-          'creatorPhotoURL': widget.user.photoURL,
+          'status': "open", // (open / running / closed)
           'origem': _origemController.text,
           'destino': _destinoController.text,
           'horario': _horarioController.text,
@@ -87,7 +85,8 @@ class _CaronaFormsState extends State<CaronaForms> {
           'valor': _valorController.text,
           'paradas': _paradasController.text,
           'members': <String>[],
-          'timestamp': FieldValue.serverTimestamp(),
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Carona criada com sucesso!")),
@@ -104,7 +103,7 @@ class _CaronaFormsState extends State<CaronaForms> {
           'placa': _placaController.text,
           'valor': _valorController.text,
           'paradas': _paradasController.text,
-          'timestamp': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Carona atualizada com sucesso!")),

@@ -95,7 +95,7 @@ class _UberPageState extends State<UberPage> {
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream:
-                  uberGroups.orderBy('timestamp', descending: true).snapshots(),
+                  uberGroups.orderBy('updatedAt', descending: true).snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());

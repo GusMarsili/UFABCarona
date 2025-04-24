@@ -56,15 +56,14 @@ class _UberFormsState extends State<UberForms> {
       if (widget.groupData == null) {
         await FirebaseFirestore.instance.collection('uberGroups').add({
           'creatorId': widget.user.uid,
-          'creatorName': widget.user.displayName,
-          'creatorEmail': widget.user.email,
-          'creatorPhotoURL': widget.user.photoURL,
+          'status': "open", // (open / running / closed)
           'origem': _origemController.text,
           'destino': _destinoController.text,
           'horario': _horarioController.text,
           'pontoEncontro': _pontoEncontroController.text,
           'members': <String>[],
-          'timestamp': FieldValue.serverTimestamp(),
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(), 
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Grupo Uber criado com sucesso!")),
@@ -78,7 +77,7 @@ class _UberFormsState extends State<UberForms> {
           'destino': _destinoController.text,
           'horario': _horarioController.text,
           'pontoEncontro': _pontoEncontroController.text,
-          'timestamp': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Grupo Uber atualizado com sucesso!")),

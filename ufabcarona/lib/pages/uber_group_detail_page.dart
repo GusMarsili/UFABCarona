@@ -29,7 +29,7 @@ class _UberGroupDetailPage extends State<UberGroupDetailPage> {
         .update({'status': status});
   }
 
-  // Confirma e finaliza a corrida (deleta o documento)
+  // Confirma e finaliza a corrida (salva no histórico, atualiza users e deleta o documento)
   Future<void> _finishGroup(BuildContext context) async {
     bool? confirm = await showDialog<bool>(
       context: context,
@@ -48,11 +48,45 @@ class _UberGroupDetailPage extends State<UberGroupDetailPage> {
         ],
       ),
     );
+
     if (confirm == true) {
-      await FirebaseFirestore.instance
-          .collection('uberGroups')
-          .doc(widget.groupId)
-          .delete();
+      final ridesRef = FirebaseFirestore.instance.collection('uberGroups').doc(widget.groupId);
+
+      // 1) Recupera os dados atuais da carona
+      final snapshot = await ridesRef.get();
+      if (snapshot.exists) {
+        final rideData = Map<String, dynamic>.from(snapshot.data()!);
+
+        // 2) Adiciona timestamp de finalização e tipo
+        rideData['finishedAt'] = FieldValue.serverTimestamp();
+        rideData['type'] = "uber";
+
+        // 3) Salva no histórico (rideRecords) com o mesmo ID
+        await FirebaseFirestore.instance
+            .collection('rideRecords')
+            .doc(widget.groupId)
+            .set(rideData);
+
+        // 4) Atualiza o array `rideHistory` em cada usuário envolvido
+        //    criador + membros
+        final List<String> userIds = [
+          rideData['creatorId'] as String,
+          ...List<String>.from(rideData['members'] ?? <String>[])
+        ];
+        for (final uid in userIds) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(uid)
+              .set({
+                'rideHistory': FieldValue.arrayUnion([widget.groupId])
+              }, SetOptions(merge: true));
+        }
+      }
+
+      // 5) Remove a carona original
+      await ridesRef.delete();
+
+      // 6) Feedback visual e retorno
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Corrida finalizada com sucesso!")),
       );
@@ -155,23 +189,52 @@ class _UberGroupDetailPage extends State<UberGroupDetailPage> {
                   style: GoogleFonts.montserrat(fontSize: 16),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundImage: (data['creatorPhotoURL'] ?? '').isNotEmpty
-                          ? NetworkImage(data['creatorPhotoURL'])
-                          : null,
-                      radius: 20,
-                      child: (data['creatorPhotoURL'] ?? '').isEmpty
-                          ? const Icon(Icons.person, size: 20)
-                          : null,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      "Criador: ${data['creatorName'] ?? 'N/I'}",
-                      style: GoogleFonts.montserrat(fontSize: 16),
-                    ),
-                  ],
+                // Informações do criador
+                FutureBuilder<DocumentSnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(data['creatorId'])
+                      .get(),
+                  builder: (context, userSnap) {
+                    if (userSnap.connectionState == ConnectionState.waiting) {
+                      return Row(
+                        children: [
+                          const CircleAvatar(
+                            radius: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text("Carregando...", style: TextStyle(fontSize: 16)),
+                        ],
+                      );
+                    }
+                    if (!userSnap.hasData || !userSnap.data!.exists) {
+                      return Row(
+                        children: [
+                          const CircleAvatar(
+                            radius: 20,
+                            child: Icon(Icons.person, size: 20),
+                          ),
+                          const SizedBox(width: 8),
+                          Text("Criador: N/I", style: GoogleFonts.montserrat(fontSize: 16)),
+                        ],
+                      );
+                    }
+                    final userData = userSnap.data!.data() as Map<String, dynamic>;
+                    final name = userData['displayName'] ?? 'N/I';
+                    final photo = (userData['photoURL'] as String?) ?? '';
+                    return Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundImage: photo.isNotEmpty ? NetworkImage(photo) : null,
+                          child: photo.isEmpty ? const Icon(Icons.person, size: 20) : null,
+                        ),
+                        const SizedBox(width: 8),
+                        Text("Criador: $name", style: GoogleFonts.montserrat(fontSize: 16)),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 24),
                 // Botão Sair (para membro)
@@ -254,24 +317,86 @@ class _UberGroupDetailPage extends State<UberGroupDetailPage> {
                     runSpacing: 12,
                     children: members.map((memberId) {
                       final bool isCurrent = memberId == widget.user.uid;
-                      final String label = isCurrent ? 'Você' : memberId;
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: Colors.grey.shade200,
-                            child: Text(
-                              isCurrent ? '😊' : memberId.substring(0, 2).toUpperCase(),
-                              style: const TextStyle(fontSize: 12),
+
+                      // Primeiro, o caso “eu mesmo”:
+                      if (isCurrent) {
+                        final name = widget.user.displayName ?? 'Você';
+                        final photoUrl = widget.user.photoURL;
+                        final avatar = CircleAvatar(
+                          radius: 20,
+                          backgroundImage:
+                              (photoUrl != null && photoUrl.isNotEmpty) ? NetworkImage(photoUrl) : null,
+                          child: (photoUrl == null || photoUrl.isEmpty)
+                              ? Text(name.substring(0,1).toUpperCase(), style: const TextStyle(fontSize: 12))
+                              : null,
+                        );
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            avatar,
+                            const SizedBox(height: 4),
+                            SizedBox(
+                              width: 60,
+                              child: Text(
+                                'Você',
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.montserrat(fontSize: 12),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            label,
-                            style: GoogleFonts.montserrat(fontSize: 12),
-                          ),
-                        ],
+                          ],
+                        );
+                      }
+
+                      // Caso “outro usuário”: aqui sim buscamos no Firestore
+                      return FutureBuilder<DocumentSnapshot>(
+                        future: FirebaseFirestore.instance.collection('users').doc(memberId).get(),
+                        builder: (context, snapUser) {
+                          if (snapUser.connectionState == ConnectionState.waiting) {
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                CircleAvatar(radius: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                                SizedBox(height: 4),
+                                SizedBox(width: 60, child: LinearProgressIndicator()),
+                              ],
+                            );
+                          }
+                          String name;
+                          String? photoUrl;
+                          if (!snapUser.hasData || !snapUser.data!.exists) {
+                            name = memberId;
+                            photoUrl = null;
+                          } else {
+                            final userData = snapUser.data!.data() as Map<String, dynamic>;
+                            name = userData['displayName'] ?? memberId;
+                            photoUrl = userData['photoURL'] as String?;
+                          }
+                          final avatar = CircleAvatar(
+                            radius: 20,
+                            backgroundImage:
+                                (photoUrl != null && photoUrl.isNotEmpty) ? NetworkImage(photoUrl) : null,
+                            child: (photoUrl == null || photoUrl.isEmpty)
+                                ? Text(name.substring(0,1).toUpperCase(), style: const TextStyle(fontSize: 12))
+                                : null,
+                          );
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              avatar,
+                              const SizedBox(height: 4),
+                              SizedBox(
+                                width: 60,
+                                child: Text(
+                                  name,
+                                  textAlign: TextAlign.center,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.montserrat(fontSize: 12),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       );
                     }).toList(),
                   ),
@@ -346,7 +471,7 @@ class _UberGroupDetailPage extends State<UberGroupDetailPage> {
                         child: const Text("Finalizar Corrida"),
                       ),
                       OutlinedButton(
-                        onPressed: () => _groupStatus('not running'),
+                        onPressed: () => _groupStatus('open'),
                         child: const Text("Voltar"),
                       ),
                     ],

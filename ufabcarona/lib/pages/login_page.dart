@@ -22,20 +22,28 @@ class LoginScreen extends StatelessWidget {
         .signInWithCredential(credential);
     final User? user = userCredential.user;
 
-    // Verifica se o email pertence ao domínio permitido
-    if (user != null &&
-        user.email != null &&
-        user.email!.endsWith("@aluno.ufabc.edu.br")) {
-      return userCredential;
-    } else {
-      // Se o email não for permitido, desloga e lança uma exceção
-      await FirebaseAuth.instance.signOut();
-      await GoogleSignIn().signOut();
-      throw FirebaseAuthException(
-        code: "email-domain-not-allowed",
-        message: "Apenas emails institucionais são permitidos.",
-      );
+    final List<String> extraAllowedEmails = [
+      // coloque aqui outros e-mails com acesso
+      "gustavo.marsiligm@gmail.com",
+    ];
+
+    // Verifica se o email pertence ao domínio permitido ou está na whitelist
+    if (user != null && user.email != null) {
+      final email = user.email!;
+      final domainOk = email.endsWith("@aluno.ufabc.edu.br");
+      final extraOk = extraAllowedEmails.contains(email);
+      if (domainOk || extraOk) {
+        return userCredential;
+      }
     }
+    
+    // Se o email não for permitido, desloga e lança uma exceção
+    await FirebaseAuth.instance.signOut();
+    await GoogleSignIn().signOut();
+    throw FirebaseAuthException(
+      code: "email-domain-not-allowed",
+      message: "Apenas emails institucionais são permitidos.",
+    );
   }
 
   @override
