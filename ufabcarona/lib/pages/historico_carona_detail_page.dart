@@ -1,39 +1,100 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class HistoricoCaronaDetailPage extends StatelessWidget {
   final Map<String, dynamic> rideData;
 
   const HistoricoCaronaDetailPage({super.key, required this.rideData});
 
+  String _formatTimestamp(dynamic ts) {
+    if (ts is Timestamp) {
+      final date = ts.toDate().toLocal();
+      return DateFormat('dd/MM/yyyy HH:mm').format(date);
+    }
+    return 'N/I';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Detalhes da Carona Finalizada")),
+      backgroundColor: Colors.white,
+      appBar: AppBar(title: const Text("Detalhes da Carona Finalizada"), backgroundColor: Colors.white,),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            Text("Origem: ${rideData['origem']}"),
+            Text("Origem: ${rideData['origem'] ?? 'N/I'}"),
             const SizedBox(height: 8),
-            Text("Destino: ${rideData['destino']}"),
+            Text("Destino: ${rideData['destino'] ?? 'N/I'}"),
             const SizedBox(height: 8),
-            Text("Horário: ${rideData['horario']}"),
+            Text("Horário: ${rideData['horario'] ?? 'N/I'}"),
             const SizedBox(height: 8),
-            Text("Ponto de Encontro: ${rideData['pontoEncontro']}"),
+            Text("Ponto de Encontro: ${rideData['pontoEncontro'] ?? 'N/I'}"),
             const SizedBox(height: 8),
-            Text("Paradas: ${rideData['paradas']}"),
+            Text("Paradas: ${rideData['paradas'] ?? 'N/I'}"),
             const SizedBox(height: 8),
-            Text("Valor: ${rideData['valor']}"),
+            Text("Valor: ${rideData['valor'] ?? 'N/I'}"),
             const SizedBox(height: 8),
-            Text("Placa: ${rideData['placa']}"),
+            Text("Placa: ${rideData['placa'] ?? 'N/I'}"),
             const SizedBox(height: 8),
-            Text("Criador: ${rideData['creatorName']}"),
+            // Informações do Criador via users collection
+            FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(rideData['creatorId'])
+                  .get(),
+              builder: (context, snap) {
+                if (snap.connectionState == ConnectionState.waiting) {
+                  return const Text("Criador: ...");
+                }
+                if (!snap.hasData || !snap.data!.exists) {
+                  return const Text("Criador: N/I");
+                }
+                final userData = snap.data!.data() as Map<String, dynamic>;
+                final name = userData['displayName'] ?? 'N/I';
+                return Text("Criador: $name");
+              },
+            ),
             const SizedBox(height: 8),
-            Text("Membros: ${(rideData['members'] as List).join(', ')}"),
+            // Lista de membros com lookup
+            if ((rideData['members'] as List<dynamic>?)?.isNotEmpty ?? false) ...[
+              const Text(
+                "Membros:",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: (rideData['members'] as List<dynamic>).map((memberId) {
+                  return FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(memberId)
+                        .get(),
+                    builder: (context, snap) {
+                      String label;
+                      if (snap.connectionState == ConnectionState.waiting) {
+                        label = '...';
+                      } else if (!snap.hasData || !snap.data!.exists) {
+                        label = memberId;
+                      } else {
+                        final userData = snap.data!.data() as Map<String, dynamic>;
+                        label = userData['displayName'] ?? memberId;
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(label),
+                      );
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
             const SizedBox(height: 8),
-            Text("Criado: ${rideData['createdAt']}"),
+            Text("Criado: ${_formatTimestamp(rideData['createdAt'])}"),
             const SizedBox(height: 8),
-            Text("Finalizado: ${rideData['finishedAt']}"),
+            Text("Finalizado: ${_formatTimestamp(rideData['finishedAt'])}"),
           ],
         ),
       ),

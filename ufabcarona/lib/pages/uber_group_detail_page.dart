@@ -16,6 +16,7 @@ class UberGroupDetailPage extends StatefulWidget {
     required this.isOwner,
   });
 
+  @override
   State<UberGroupDetailPage> createState() => _UberGroupDetailPage();
 }
 

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'historico_carona_detail_page.dart';
 import 'historico_uber_detail_page.dart';
 
@@ -23,10 +24,19 @@ class HistoricoPage extends StatelessWidget {
     return Future.wait(rideFutures);
   }
 
+  String _formatTimestamp(dynamic ts) {
+    if (ts is Timestamp) {
+      final date = ts.toDate().toLocal();
+      return DateFormat('dd/MM/yyyy HH:mm').format(date);
+    }
+    return 'N/I';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Histórico de Caronas')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(title: const Text('Histórico de Caronas'), backgroundColor: Colors.white,),
       body: FutureBuilder<List<DocumentSnapshot>>(
         future: _getUserRideHistory(),
         builder: (context, snapshot) {
@@ -36,17 +46,18 @@ class HistoricoPage extends StatelessWidget {
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text("Nenhuma carona finalizada encontrada."));
           }
-
+          
           final rides = snapshot.data!;
           return ListView.builder(
             itemCount: rides.length,
             itemBuilder: (context, index) {
               final ride = rides[index].data() as Map<String, dynamic>;
               return Card(
+                color: Colors.white,
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: ListTile(
                   title: Text('${ride['origem']} → ${ride['destino']}'),
-                  subtitle: Text('Data: ${ride['finishedAt']}'),
+                  subtitle: Text('Data: ${_formatTimestamp(ride['finishedAt'])}'),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     if (ride['type'] == 'carona') {
@@ -63,8 +74,7 @@ class HistoricoPage extends StatelessWidget {
                           builder: (_) => HistoricoUberDetailPage(rideData: ride),
                         ),
                       );
-                    } else {
-                      // Opcional: tratar tipo desconhecido
+                    } else {                  
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Tipo de carona desconhecido.')),
                       );
