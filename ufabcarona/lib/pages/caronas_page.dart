@@ -82,6 +82,9 @@ class _CaronasPageState extends State<CaronasPage> {
               ),
             );
           }
+
+          
+
           return ListView(
             children: [
               if (mostrarFiltros)
@@ -109,12 +112,18 @@ class _CaronasPageState extends State<CaronasPage> {
               ...snapshot.data!.docs.map((DocumentSnapshot document) {
                 Map<String, dynamic> data =
                     document.data() as Map<String, dynamic>;
+
+                  final List<dynamic> members = data['members'] ?? [];
+                  final int vagasTotais = data['vagas'] ; 
+                  final int vagasDisponiveis = vagasTotais - members.length;
+
                 if (data['origem'].toLowerCase().contains(
                       _controllerOrigem.text.toLowerCase(),
                     ) &&
                     data['destino'].toLowerCase().contains(
                       _controllerDestino.text.toLowerCase(),
-                    )) {
+                    ) && 
+                    vagasDisponiveis > 0) {
                   bool isOwner = data['creatorId'] == user.uid;
                   return CaronaCard(
                     data: data,
