@@ -48,7 +48,7 @@ class _CaronaFormsState extends State<CaronaForms> {
       _marcaController.text = widget.rideData!['marca'] ?? '';
       _modeloController.text = widget.rideData!['modelo'] ?? '';
       _placaController.text = widget.rideData!['placa'] ?? '';
-      _valorController.text = widget.rideData!['valor'] ?? '';
+      _valorController.text = widget.rideData!['valor']?.toString() ?? '';
       _paradasController.text = widget.rideData!['paradas'] ?? '';
     }
   }
@@ -142,7 +142,7 @@ class _CaronaFormsState extends State<CaronaForms> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBarScreen().build(),
+      appBar: AppBarScreen().build(true),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
