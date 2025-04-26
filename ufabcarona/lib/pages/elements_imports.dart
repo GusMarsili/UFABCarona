@@ -133,7 +133,7 @@ abstract class Cards {
     );
   }
 
-  Widget foto(String creatorId) {
+  Widget foto(String creatorId, {double size = 23, bool returnName = false}) {
     return FutureBuilder<DocumentSnapshot>(
       future:
           FirebaseFirestore.instance.collection('users').doc(creatorId).get(),
@@ -141,7 +141,7 @@ abstract class Cards {
         // Enquanto carrega, mostra um placeholder
         if (snapUser.connectionState == ConnectionState.waiting) {
           return CircleAvatar(
-            radius: 23,
+            radius: size,
             backgroundColor: Colors.grey.shade200,
             child: const CircularProgressIndicator(strokeWidth: 2),
           );
@@ -149,7 +149,7 @@ abstract class Cards {
         // Se não existir, mostra ícone genérico
         if (!snapUser.hasData || !snapUser.data!.exists) {
           return CircleAvatar(
-            radius: 23,
+            radius: size,
             backgroundColor: Colors.grey.shade200,
             child: const Icon(Icons.person, size: 20),
           );
@@ -157,19 +157,31 @@ abstract class Cards {
         // Se encontrou, usa o campo photoURL do doc user
         final userData = snapUser.data!.data() as Map<String, dynamic>;
         final photoUrl = userData['photoURL'] as String? ?? '';
-        return CircleAvatar(
-          radius: 23,
-          backgroundColor: Colors.grey.shade200,
-          backgroundImage: photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
-          child:
-              photoUrl.isEmpty
-                  ? Text(
-                    (userData['displayName'] as String? ?? '')
-                        .substring(0, 1)
-                        .toUpperCase(),
-                    style: const TextStyle(fontSize: 12),
-                  )
-                  : null,
+
+        return Row(
+          children: [
+            CircleAvatar(
+              radius: size,
+              backgroundColor: Colors.grey.shade200,
+              backgroundImage:
+                  photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
+              child:
+                  photoUrl.isEmpty
+                      ? Text(
+                        (userData['displayName'] as String? ?? '')
+                            .substring(0, 1)
+                            .toUpperCase(),
+                        style: const TextStyle(fontSize: 12),
+                      )
+                      : null,
+            ),
+            if (returnName) const SizedBox(width: 8),
+            if (returnName)
+              Text(
+                userData['displayName'] ?? 'N/I',
+                style: GoogleFonts.montserrat(fontSize: 16),
+              ),
+          ],
         );
       },
     );
@@ -341,6 +353,110 @@ class UberCard extends Cards {
                 ),
               );
             }),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class UberCardDetail extends Cards {
+  final List<dynamic> members;
+  UberCardDetail({required super.data, required this.members});
+
+  Widget build() {
+    return Card(
+      color: Color(0xFFFBFBFB),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.all(12),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            letreiro(),
+            const SizedBox(height: 20),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 16),
+                      horario(),
+                      const SizedBox(width: 16),
+                      encontro(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text(
+              "Criador(a):",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Montserrat',
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 15),
+            foto(data['creatorId'], size: 30, returnName: true),
+            const SizedBox(height: 15),
+            Text(
+              "Participantes:",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Montserrat',
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 10),
+            if (members.isNotEmpty)
+              ...members.map((member) {
+                return FutureBuilder<DocumentSnapshot>(
+                  future:
+                      FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(member)
+                          .get(),
+                  builder: (context, snapUser) {
+                    if (snapUser.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    if (!snapUser.hasData || !snapUser.data!.exists) {
+                      return const SizedBox.shrink();
+                    }
+                    final userData =
+                        snapUser.data!.data() as Map<String, dynamic>;
+                    return Column(
+                      children: [
+                        const SizedBox(height: 3),
+                        Row(
+                          children: [
+                            foto(member, size: 30),
+                            const SizedBox(width: 10),
+                            Text(
+                              userData['displayName'] ?? 'N/I',
+                              style: GoogleFonts.montserrat(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
+                );
+              })
+            else ...[
+              Text(
+                "Nenhum participante ainda.",
+                style: GoogleFonts.montserrat(fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ],
         ),
       ),
