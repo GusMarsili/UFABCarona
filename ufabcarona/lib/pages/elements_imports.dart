@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 // import 'package:cached_network_image/cached_network_image.dart';
 
 class AppBarScreen {
-  AppBar build() {
+  AppBar build(bool status) {
     return AppBar(
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       centerTitle: true,
@@ -25,6 +25,7 @@ class AppBarScreen {
           ),
         ],
       ),
+      automaticallyImplyLeading: status,
     );
   }
 }
@@ -35,6 +36,12 @@ String _getFirstName(String? name) {
   return parts.length >= 2 ? '${parts[0]} ' : parts[0];
 }
 
+String formatarPrimeiraLetra(String? texto) {
+    if (texto == null || texto.isEmpty) return 'N/I';
+    texto = texto.toLowerCase();
+    return texto[0].toUpperCase() + texto.substring(1);
+  }
+
 abstract class Cards {
   final Map<String, dynamic> data;
   const Cards({required this.data});
@@ -44,7 +51,7 @@ abstract class Cards {
       child: Row(
         children: [
           Text(
-            data['origem'] ?? 'N/I',
+            formatarPrimeiraLetra(data['origem']),
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontFamily: 'Montserrat',
@@ -55,7 +62,7 @@ abstract class Cards {
           Image.asset('lib/images/arrow.png', height: 12),
           SizedBox(width: 8),
           Text(
-            data['destino'] ?? 'N/I',
+            formatarPrimeiraLetra(data['destino']),
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontFamily: 'Montserrat',
@@ -94,12 +101,43 @@ abstract class Cards {
         Icon(Icons.location_on, size: 20),
         SizedBox(width: 4),
         Text(
-          data['pontoEncontro'] ?? 'N/I',
+          formatarPrimeiraLetra(data['pontoEncontro']) ,
           style: TextStyle(fontFamily: 'Montserrat', fontSize: 15),
         ),
       ],
     );
   }
+
+  Widget carro(){
+    
+
+  String formatarPlaca(String? placa) {
+    if (placa == null || placa.isEmpty) return 'N/I';
+    return placa.toUpperCase();
+  }
+  return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      
+      children: [
+        Icon(Icons.drive_eta, size: 20),
+        SizedBox(width: 5),
+        Text(
+          formatarPrimeiraLetra(data['marca']),
+          style: TextStyle(fontFamily: 'Montserrat', fontSize: 15),
+        ),
+        SizedBox(width: 5),
+        Text(
+          formatarPrimeiraLetra(data['modelo']),
+          style: TextStyle(fontFamily: 'Montserrat', fontSize: 15),
+        ),
+        SizedBox(width: 5),
+        Text(
+          formatarPlaca(data['placa']),
+          style: TextStyle(fontFamily: 'Montserrat', fontSize: 15),
+        ),
+      ],
+    );
+}
 
   Widget botao(
     String textoBotao,
@@ -187,6 +225,8 @@ abstract class Cards {
     );
   }
 }
+
+
 
 class CaronaCard extends Cards {
   CaronaCard({required super.data});
@@ -318,28 +358,15 @@ class UberCard extends Cards {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             letreiro(),
             const SizedBox(height: 10),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-
-                    children: [
-                      const SizedBox(height: 16),
-                      // Horário
-                      horario(),
-                      const SizedBox(width: 16),
-                      encontro(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+            horario(),
+            SizedBox(height: 10),
+            encontro(),
+            const SizedBox(height: 10),
             botao("Participar", double.infinity, () {
               Navigator.push(
                 context,
@@ -378,22 +405,9 @@ class UberCardDetail extends Cards {
           children: [
             letreiro(),
             const SizedBox(height: 20),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 16),
-                      horario(),
-                      const SizedBox(width: 16),
-                      encontro(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            horario(),
+            SizedBox(height: 16),
+            encontro(),
             const SizedBox(height: 20),
             Text(
               "Criador(a):",
@@ -463,6 +477,120 @@ class UberCardDetail extends Cards {
     );
   }
 }
+
+
+class CaronaCardDetail extends Cards {
+  final List<dynamic> members;
+  CaronaCardDetail({required super.data, required this.members});
+
+  Widget build() {
+    return Card(
+      color: Color(0xFFFBFBFB),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.all(12),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            letreiro(), //origem e destino
+            const SizedBox(height: 15),
+            Text( //valor da corrida
+                    "R\$ ${data['valor'] ?? 'N/I'}",
+                    style: TextStyle(
+                      fontWeight: FontWeight.normal,
+                      fontFamily: 'Montserrat',
+                      fontSize: 20,
+                    ),
+                  ),
+            SizedBox(height: 15),
+            horario(), // horario e vagas
+            SizedBox(height: 15),
+            encontro(), //ponto de encontro
+            const SizedBox(height: 15),
+            carro(), //marca, modelo e placa do carro
+            SizedBox(height: 15),
+            Text(
+                  
+                    "Paradas: ${data['paradas'] ?? '0'}",
+                    style: TextStyle(
+                      fontWeight: FontWeight.normal,
+                      fontFamily: 'Montserrat',
+                      fontSize: 15,
+                    ),
+                  ),
+            SizedBox(height: 15),
+            Text(
+              "Criador(a):",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Montserrat',
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 15),
+            foto(data['creatorId'], size: 30, returnName: true),
+            const SizedBox(height: 15),
+            Text(
+              "Participantes:",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Montserrat',
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 10),
+            if (members.isNotEmpty)
+              ...members.map((member) {
+                return FutureBuilder<DocumentSnapshot>(
+                  future:
+                      FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(member)
+                          .get(),
+                  builder: (context, snapUser) {
+                    if (snapUser.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    if (!snapUser.hasData || !snapUser.data!.exists) {
+                      return const SizedBox.shrink();
+                    }
+                    final userData =
+                        snapUser.data!.data() as Map<String, dynamic>;
+                    return Column(
+                      children: [
+                        const SizedBox(height: 5),
+                        Row(
+                          children: [
+                            foto(member, size: 30),
+                            const SizedBox(width: 10),
+                            Text(
+                              userData['displayName'] ?? 'N/I',
+                              style: GoogleFonts.montserrat(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
+                );
+              })
+            else ...[
+              Text(
+                "Nenhum participante ainda.",
+                style: GoogleFonts.montserrat(fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 
 class TextFieldElement {
   final String labelText;
