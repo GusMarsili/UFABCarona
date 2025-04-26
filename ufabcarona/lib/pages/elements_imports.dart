@@ -46,6 +46,14 @@ abstract class Cards {
   final Map<String, dynamic> data;
   const Cards({required this.data});
 
+
+
+  int calcularVagas(int vagasTotais, List<dynamic> membros) {
+    int vagasDisponiveis = vagasTotais - membros.length;
+    return vagasDisponiveis.clamp(0, double.infinity).toInt();
+  }
+
+
   Widget letreiro() {
     return Center(
       child: Row(
@@ -74,7 +82,8 @@ abstract class Cards {
     );
   }
 
-  Widget horario() {
+
+  Widget horario([int? vagas]) {
     return Row(
       children: [
         Icon(Icons.access_time, size: 20), //access_time
@@ -86,13 +95,16 @@ abstract class Cards {
         SizedBox(width: 16),
         Icon(Icons.person, size: 20),
         SizedBox(width: 4),
+        
         Text(
-          "${data['vagas'] ?? 'N/I'} vagas",
+          vagas != null ? "$vagas vagas" : "Vagas N/I",
           style: TextStyle(fontFamily: 'Montserrat', fontSize: 15),
         ),
       ],
     );
   }
+
+ 
 
   Widget encontro() {
     return Row(
@@ -230,13 +242,15 @@ abstract class Cards {
 
 class CaronaCard extends Cards {
   CaronaCard({required super.data});
-
+  
   Widget build(
     bool isOwner,
     User user,
     String documentId,
     BuildContext context,
   ) {
+    final List<dynamic> members = data['members'] ?? [];
+    int vagasDisponiveis = calcularVagas(data['vagas'], members);
     return Card(
       color: Color(0xFFFBFBFB),
       elevation: 4,
@@ -260,7 +274,7 @@ class CaronaCard extends Cards {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [horario(), encontro()],
+                      children: [horario(vagasDisponiveis), encontro()],
                     ),
 
                     // Foto e nome
@@ -350,6 +364,8 @@ class UberCard extends Cards {
     String documentId,
     BuildContext context,
   ) {
+    final List<dynamic> members = data['members'] ?? [];
+    int vagasDisponiveis = calcularVagas(3, members);
     return Card(
       color: Color(0xFFFBFBFB),
       elevation: 4,
@@ -363,7 +379,7 @@ class UberCard extends Cards {
           children: [
             letreiro(),
             const SizedBox(height: 10),
-            horario(),
+            horario(vagasDisponiveis),
             SizedBox(height: 10),
             encontro(),
             const SizedBox(height: 10),
@@ -391,7 +407,11 @@ class UberCardDetail extends Cards {
   final List<dynamic> members;
   UberCardDetail({required super.data, required this.members});
 
+
+
   Widget build() {
+    final List<dynamic> members = data['members'] ?? [];
+    int vagasDisponiveis = calcularVagas(3, members);
     return Card(
       color: Color(0xFFFBFBFB),
       elevation: 4,
@@ -405,7 +425,7 @@ class UberCardDetail extends Cards {
           children: [
             letreiro(),
             const SizedBox(height: 20),
-            horario(),
+            horario(vagasDisponiveis),
             SizedBox(height: 16),
             encontro(),
             const SizedBox(height: 20),
@@ -484,6 +504,8 @@ class CaronaCardDetail extends Cards {
   CaronaCardDetail({required super.data, required this.members});
 
   Widget build() {
+    final List<dynamic> members = data['members'] ?? [];
+    int vagasDisponiveis = calcularVagas(data['vagas'], members);
     return Card(
       color: Color(0xFFFBFBFB),
       elevation: 4,
@@ -506,7 +528,7 @@ class CaronaCardDetail extends Cards {
                     ),
                   ),
             SizedBox(height: 15),
-            horario(), // horario e vagas
+            horario(vagasDisponiveis), // horario e vagas
             SizedBox(height: 15),
             encontro(), //ponto de encontro
             const SizedBox(height: 15),
