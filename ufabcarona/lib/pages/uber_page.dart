@@ -113,13 +113,19 @@ class _UberPageState extends State<UberPage> {
                       snapshot.data!.docs.map((DocumentSnapshot document) {
                         Map<String, dynamic> data =
                             document.data() as Map<String, dynamic>;
+
+                            final List<dynamic> members = data['members'] ?? [];
+                             
+                            final int vagasDisponiveis = 3 - members.length;
+
                         // Verifica se a carona foi criada pelo usuário atual
                         if (data['origem'].toLowerCase().contains(
                               _controllerOrigem.text.toLowerCase(),
                             ) &&
                             data['destino'].toLowerCase().contains(
                               _controllerDestino.text.toLowerCase(),
-                            )) {
+                            ) &&
+                            vagasDisponiveis>0) {
                           bool isOwner = data['creatorId'] == user.uid;
                           return UberCard(
                             data: data,
