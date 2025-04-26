@@ -48,7 +48,7 @@ class _CaronaFormsState extends State<CaronaForms> {
       _marcaController.text = widget.rideData!['marca'] ?? '';
       _modeloController.text = widget.rideData!['modelo'] ?? '';
       _placaController.text = widget.rideData!['placa'] ?? '';
-      _valorController.text = widget.rideData!['valor']?.toString() ?? '';
+      _valorController.text = widget.rideData!['valor'] ?? '';
       _paradasController.text = widget.rideData!['paradas'] ?? '';
     }
   }
