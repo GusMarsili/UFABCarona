@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ufabcarona/pages/elements_imports.dart';
 import 'carona_forms.dart';
 
 class CaronaDetailPage extends StatefulWidget {
@@ -172,107 +173,121 @@ class _CaronaDetailPageState extends State<CaronaDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Dados da carona
+
                 Text(
-                  "Destino: ${data['destino'] ?? 'N/I'}",
+                  "Detalhes do Grupo Uber",
                   style: GoogleFonts.montserrat(
-                      fontSize: 18, fontWeight: FontWeight.bold),
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  "Origem: ${data['origem'] ?? 'N/I'}",
-                  style: GoogleFonts.montserrat(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Horário: ${data['horario'] ?? 'N/I'}",
-                  style: GoogleFonts.montserrat(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Ponto de Encontro: ${data['pontoEncontro'] ?? 'N/I'}",
-                  style: GoogleFonts.montserrat(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Vagas: $vagas",
-                  style: GoogleFonts.montserrat(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Marca do Carro: ${data['marca'] ?? 'N/I'}",
-                  style: GoogleFonts.montserrat(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Modelo do Carro: ${data['modelo'] ?? 'N/I'}",
-                  style: GoogleFonts.montserrat(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Placa do Carro: ${data['placa'] ?? 'N/I'}",
-                  style: GoogleFonts.montserrat(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Valor: R\$ ${data['valor'] ?? 'N/I'}",
-                  style: GoogleFonts.montserrat(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Número de Paradas: ${data['paradas'] ?? 'N/I'}",
-                  style: GoogleFonts.montserrat(fontSize: 16),
-                ),
-                const SizedBox(height: 16),
-                // Informações do criador
-                FutureBuilder<DocumentSnapshot>(
-                  future: FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(data['creatorId'])
-                      .get(),
-                  builder: (context, userSnap) {
-                    if (userSnap.connectionState == ConnectionState.waiting) {
-                      return Row(
-                        children: [
-                          const CircleAvatar(
-                            radius: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text("Carregando...", style: TextStyle(fontSize: 16)),
-                        ],
-                      );
-                    }
-                    if (!userSnap.hasData || !userSnap.data!.exists) {
-                      return Row(
-                        children: [
-                          const CircleAvatar(
-                            radius: 20,
-                            child: Icon(Icons.person, size: 20),
-                          ),
-                          const SizedBox(width: 8),
-                          Text("Criador: N/I", style: GoogleFonts.montserrat(fontSize: 16)),
-                        ],
-                      );
-                    }
-                    final userData = userSnap.data!.data() as Map<String, dynamic>;
-                    final name = userData['displayName'] ?? 'N/I';
-                    final photo = (userData['photoURL'] as String?) ?? '';
-                    return Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundImage: photo.isNotEmpty ? NetworkImage(photo) : null,
-                          child: photo.isEmpty ? const Icon(Icons.person, size: 20) : null,
-                        ),
-                        const SizedBox(width: 8),
-                        Text("Criador: $name", style: GoogleFonts.montserrat(fontSize: 16)),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: 24),
-                // Botão Sair (para membro)
+                CaronaCardDetail(data: data, members: members).build(),
+
+                // Dados da carona
+                // Text(
+                //   "Destino: ${data['destino'] ?? 'N/I'}",
+                //   style: GoogleFonts.montserrat(
+                //       fontSize: 18, fontWeight: FontWeight.bold),
+                // ),
+                // const SizedBox(height: 8),
+                // Text(
+                //   "Origem: ${data['origem'] ?? 'N/I'}",
+                //   style: GoogleFonts.montserrat(fontSize: 16),
+                // ),
+                // const SizedBox(height: 8),
+                // Text(
+                //   "Horário: ${data['horario'] ?? 'N/I'}",
+                //   style: GoogleFonts.montserrat(fontSize: 16),
+                // ),
+                // const SizedBox(height: 8),
+                // Text(
+                //   "Ponto de Encontro: ${data['pontoEncontro'] ?? 'N/I'}",
+                //   style: GoogleFonts.montserrat(fontSize: 16),
+                // ),
+                // const SizedBox(height: 8),
+                // Text(
+                //   "Vagas: $vagas",
+                //   style: GoogleFonts.montserrat(fontSize: 16),
+                // ),
+                // const SizedBox(height: 8),
+                // Text(
+                //   "Marca do Carro: ${data['marca'] ?? 'N/I'}",
+                //   style: GoogleFonts.montserrat(fontSize: 16),
+                // ),
+                // const SizedBox(height: 8),
+                // Text(
+                //   "Modelo do Carro: ${data['modelo'] ?? 'N/I'}",
+                //   style: GoogleFonts.montserrat(fontSize: 16),
+                // ),
+                // const SizedBox(height: 8),
+                // Text(
+                //   "Placa do Carro: ${data['placa'] ?? 'N/I'}",
+                //   style: GoogleFonts.montserrat(fontSize: 16),
+                // ),
+                // const SizedBox(height: 8),
+                // Text(
+                //   "Valor: R\$ ${data['valor'] ?? 'N/I'}",
+                //   style: GoogleFonts.montserrat(fontSize: 16),
+                // ),
+                // const SizedBox(height: 8),
+                // Text(
+                //   "Número de Paradas: ${data['paradas'] ?? 'N/I'}",
+                //   style: GoogleFonts.montserrat(fontSize: 16),
+                // ),
+                // const SizedBox(height: 16),
+                // // Informações do criador
+                // FutureBuilder<DocumentSnapshot>(
+                //   future: FirebaseFirestore.instance
+                //       .collection('users')
+                //       .doc(data['creatorId'])
+                //       .get(),
+                //   builder: (context, userSnap) {
+                //     if (userSnap.connectionState == ConnectionState.waiting) {
+                //       return Row(
+                //         children: [
+                //           const CircleAvatar(
+                //             radius: 20,
+                //             child: CircularProgressIndicator(strokeWidth: 2),
+                //           ),
+                //           const SizedBox(width: 8),
+                //           const Text("Carregando...", style: TextStyle(fontSize: 16)),
+                //         ],
+                //       );
+                //     }
+                //     if (!userSnap.hasData || !userSnap.data!.exists) {
+                //       return Row(
+                //         children: [
+                //           const CircleAvatar(
+                //             radius: 20,
+                //             child: Icon(Icons.person, size: 20),
+                //           ),
+                //           const SizedBox(width: 8),
+                //           Text("Criador: N/I", style: GoogleFonts.montserrat(fontSize: 16)),
+                //         ],
+                //       );
+                //     }
+                //     final userData = userSnap.data!.data() as Map<String, dynamic>;
+                //     final name = userData['displayName'] ?? 'N/I';
+                //     final photo = (userData['photoURL'] as String?) ?? '';
+                //     return Row(
+                //       children: [
+                //         CircleAvatar(
+                //           radius: 20,
+                //           backgroundImage: photo.isNotEmpty ? NetworkImage(photo) : null,
+                //           child: photo.isEmpty ? const Icon(Icons.person, size: 20) : null,
+                //         ),
+                //         const SizedBox(width: 8),
+                //         Text("Criador: $name", style: GoogleFonts.montserrat(fontSize: 16)),
+                //       ],
+                //     );
+                //   },
+                // ),
+                // const SizedBox(height: 24),
+
+
+
+                // // Botão Sair (para membro)
                 if (!widget.isOwner && isMember)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -336,106 +351,106 @@ class _CaronaDetailPageState extends State<CaronaDetailPage> {
                     ),
                   ),
                 const SizedBox(height: 24),
-                // Lista de membros
-                if (members.isNotEmpty) ...[
-                  Text(
-                    "Membros:",
-                    style: GoogleFonts.montserrat(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: members.map((memberId) {
-                      final bool isCurrent = memberId == widget.user.uid;
+                // // Lista de membros
+                // if (members.isNotEmpty) ...[
+                //   Text(
+                //     "Membros:",
+                //     style: GoogleFonts.montserrat(
+                //       fontSize: 16,
+                //       fontWeight: FontWeight.bold,
+                //     ),
+                //   ),
+                //   const SizedBox(height: 8),
+                //   Wrap(
+                //     spacing: 12,
+                //     runSpacing: 12,
+                //     children: members.map((memberId) {
+                //       final bool isCurrent = memberId == widget.user.uid;
 
-                      // Primeiro, o caso “eu mesmo”:
-                      if (isCurrent) {
-                        final name = widget.user.displayName ?? 'Você';
-                        final photoUrl = widget.user.photoURL;
-                        final avatar = CircleAvatar(
-                          radius: 20,
-                          backgroundImage:
-                              (photoUrl != null && photoUrl.isNotEmpty) ? NetworkImage(photoUrl) : null,
-                          child: (photoUrl == null || photoUrl.isEmpty)
-                              ? Text(name.substring(0,1).toUpperCase(), style: const TextStyle(fontSize: 12))
-                              : null,
-                        );
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            avatar,
-                            const SizedBox(height: 4),
-                            SizedBox(
-                              width: 60,
-                              child: Text(
-                                'Você',
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.montserrat(fontSize: 12),
-                              ),
-                            ),
-                          ],
-                        );
-                      }
+                //       // Primeiro, o caso “eu mesmo”:
+                //       if (isCurrent) {
+                //         final name = widget.user.displayName ?? 'Você';
+                //         final photoUrl = widget.user.photoURL;
+                //         final avatar = CircleAvatar(
+                //           radius: 20,
+                //           backgroundImage:
+                //               (photoUrl != null && photoUrl.isNotEmpty) ? NetworkImage(photoUrl) : null,
+                //           child: (photoUrl == null || photoUrl.isEmpty)
+                //               ? Text(name.substring(0,1).toUpperCase(), style: const TextStyle(fontSize: 12))
+                //               : null,
+                //         );
+                //         return Column(
+                //           mainAxisSize: MainAxisSize.min,
+                //           children: [
+                //             avatar,
+                //             const SizedBox(height: 4),
+                //             SizedBox(
+                //               width: 60,
+                //               child: Text(
+                //                 'Você',
+                //                 textAlign: TextAlign.center,
+                //                 overflow: TextOverflow.ellipsis,
+                //                 style: GoogleFonts.montserrat(fontSize: 12),
+                //               ),
+                //             ),
+                //           ],
+                //         );
+                //       }
 
-                      // Caso “outro usuário”: aqui sim buscamos no Firestore
-                      return FutureBuilder<DocumentSnapshot>(
-                        future: FirebaseFirestore.instance.collection('users').doc(memberId).get(),
-                        builder: (context, snapUser) {
-                          if (snapUser.connectionState == ConnectionState.waiting) {
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: const [
-                                CircleAvatar(radius: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-                                SizedBox(height: 4),
-                                SizedBox(width: 60, child: LinearProgressIndicator()),
-                              ],
-                            );
-                          }
-                          String name;
-                          String? photoUrl;
-                          if (!snapUser.hasData || !snapUser.data!.exists) {
-                            name = memberId;
-                            photoUrl = null;
-                          } else {
-                            final userData = snapUser.data!.data() as Map<String, dynamic>;
-                            name = userData['displayName'] ?? memberId;
-                            photoUrl = userData['photoURL'] as String?;
-                          }
-                          final avatar = CircleAvatar(
-                            radius: 20,
-                            backgroundImage:
-                                (photoUrl != null && photoUrl.isNotEmpty) ? NetworkImage(photoUrl) : null,
-                            child: (photoUrl == null || photoUrl.isEmpty)
-                                ? Text(name.substring(0,1).toUpperCase(), style: const TextStyle(fontSize: 12))
-                                : null,
-                          );
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              avatar,
-                              const SizedBox(height: 4),
-                              SizedBox(
-                                width: 60,
-                                child: Text(
-                                  name,
-                                  textAlign: TextAlign.center,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.montserrat(fontSize: 12),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 24),
-                ],
+                //       // Caso “outro usuário”: aqui sim buscamos no Firestore
+                //       return FutureBuilder<DocumentSnapshot>(
+                //         future: FirebaseFirestore.instance.collection('users').doc(memberId).get(),
+                //         builder: (context, snapUser) {
+                //           if (snapUser.connectionState == ConnectionState.waiting) {
+                //             return Column(
+                //               mainAxisSize: MainAxisSize.min,
+                //               children: const [
+                //                 CircleAvatar(radius: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                //                 SizedBox(height: 4),
+                //                 SizedBox(width: 60, child: LinearProgressIndicator()),
+                //               ],
+                //             );
+                //           }
+                //           String name;
+                //           String? photoUrl;
+                //           if (!snapUser.hasData || !snapUser.data!.exists) {
+                //             name = memberId;
+                //             photoUrl = null;
+                //           } else {
+                //             final userData = snapUser.data!.data() as Map<String, dynamic>;
+                //             name = userData['displayName'] ?? memberId;
+                //             photoUrl = userData['photoURL'] as String?;
+                //           }
+                //           final avatar = CircleAvatar(
+                //             radius: 20,
+                //             backgroundImage:
+                //                 (photoUrl != null && photoUrl.isNotEmpty) ? NetworkImage(photoUrl) : null,
+                //             child: (photoUrl == null || photoUrl.isEmpty)
+                //                 ? Text(name.substring(0,1).toUpperCase(), style: const TextStyle(fontSize: 12))
+                //                 : null,
+                //           );
+                //           return Column(
+                //             mainAxisSize: MainAxisSize.min,
+                //             children: [
+                //               avatar,
+                //               const SizedBox(height: 4),
+                //               SizedBox(
+                //                 width: 60,
+                //                 child: Text(
+                //                   name,
+                //                   textAlign: TextAlign.center,
+                //                   overflow: TextOverflow.ellipsis,
+                //                   style: GoogleFonts.montserrat(fontSize: 12),
+                //                 ),
+                //               ),
+                //             ],
+                //           );
+                //         },
+                //       );
+                //     }).toList(),
+                //   ),
+                //   const SizedBox(height: 24),
+                // ],
                 // Botões de ação para o criador (editar/deletar)
                 if (widget.isOwner)
                   Row(
