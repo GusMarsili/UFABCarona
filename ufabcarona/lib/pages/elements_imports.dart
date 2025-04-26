@@ -12,13 +12,9 @@ class AppBarScreen {
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       centerTitle: true,
       title: Row(
-      
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(
-            'lib/images/logo-degrade.png',
-            height: 50,
-          ),
+          Image.asset('lib/images/logo-degrade.png', height: 50),
           Text(
             "UFABCarona",
             style: GoogleFonts.poppins(
@@ -80,6 +76,13 @@ abstract class Cards {
           data['horario'] ?? 'N/I',
           style: const TextStyle(fontSize: 15, fontFamily: 'Montserrat'),
         ),
+        SizedBox(width: 16),
+        Icon(Icons.person, size: 20),
+        SizedBox(width: 4),
+        Text(
+          "${data['vagas'] ?? 'N/I'} vagas",
+          style: TextStyle(fontFamily: 'Montserrat', fontSize: 15),
+        ),
       ],
     );
   }
@@ -88,13 +91,6 @@ abstract class Cards {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(Icons.person, size: 20),
-        SizedBox(width: 4),
-        Text(
-          "${data['vagas'] ?? 'N/I'} vagas",
-          style: TextStyle(fontFamily: 'Montserrat', fontSize: 15),
-        ),
-        SizedBox(width: 16),
         Icon(Icons.location_on, size: 20),
         SizedBox(width: 4),
         Text(
@@ -105,42 +101,42 @@ abstract class Cards {
     );
   }
 
-  Widget botao(String textoBotao,double sizeWidth, void Function()? funcaoBotao) {
+  Widget botao(
+    String textoBotao,
+    double sizeWidth,
+    void Function()? funcaoBotao,
+  ) {
     return Align(
       alignment: Alignment.centerLeft,
       child: SizedBox(
-      width: sizeWidth, //double.infinity,245
-      height: 30,
-      child: ElevatedButton(
-        
-        onPressed: funcaoBotao,
-        style: ElevatedButton.styleFrom(
-          
-          backgroundColor: Colors.amber,
-          padding: const EdgeInsets.symmetric(vertical: 5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+        width: sizeWidth, //double.infinity,245
+        height: 30,
+        child: ElevatedButton(
+          onPressed: funcaoBotao,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.amber,
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
           ),
-        ),
-        child: Text(
-          textoBotao,
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Montserrat',
+          child: Text(
+            textoBotao,
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Montserrat',
+            ),
           ),
         ),
       ),
-    ),
     );
   }
 
   Widget foto(String creatorId) {
     return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance
-          .collection('users')
-          .doc(creatorId)
-          .get(),
+      future:
+          FirebaseFirestore.instance.collection('users').doc(creatorId).get(),
       builder: (context, snapUser) {
         // Enquanto carrega, mostra um placeholder
         if (snapUser.connectionState == ConnectionState.waiting) {
@@ -164,16 +160,16 @@ abstract class Cards {
         return CircleAvatar(
           radius: 23,
           backgroundColor: Colors.grey.shade200,
-          backgroundImage:
-              photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
-          child: photoUrl.isEmpty
-              ? Text(
-                  (userData['displayName'] as String? ?? '')
-                      .substring(0, 1)
-                      .toUpperCase(),
-                  style: const TextStyle(fontSize: 12),
-                )
-              : null,
+          backgroundImage: photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
+          child:
+              photoUrl.isEmpty
+                  ? Text(
+                    (userData['displayName'] as String? ?? '')
+                        .substring(0, 1)
+                        .toUpperCase(),
+                    style: const TextStyle(fontSize: 12),
+                  )
+                  : null,
         );
       },
     );
@@ -193,74 +189,69 @@ class CaronaCard extends Cards {
       color: Color(0xFFFBFBFB),
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      margin: const EdgeInsets.symmetric(horizontal: 25,vertical: 5), 
+      margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
       child: SizedBox(
         height: 165,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 18), 
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 18),
 
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               letreiro(),
-              
+
               Expanded(
                 child: Row(
-                  
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Informações da viagem  
-                                   
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [ 
-                                                   
-                          horario(),  
-                                                  
-                          encontro(),
-                        ],
-                      ),
-                    
-                    
+                    // Informações da viagem
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [horario(), encontro()],
+                    ),
+
                     // Foto e nome
-                    
-                       Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          
-                          children: [  
-                                                                                   
-                               foto(data['creatorId']),
-                                                         
-                               FutureBuilder<DocumentSnapshot>(
-                                  future: FirebaseFirestore.instance
-                                      .collection('users')
-                                      .doc(data['creatorId'])
-                                      .get(),
-                                  builder: (context, snapUser) {
-                                    String firstName = '';
-                                    if (snapUser.connectionState == ConnectionState.waiting) {
-                                      firstName = 'Carregando...'; 
-                                    } else if (snapUser.hasData && snapUser.data!.exists) {
-                                      final userData = snapUser.data!.data() as Map<String, dynamic>;
-                                      final fullName = userData['displayName'] as String? ?? '';
-                                      firstName = _getFirstName(fullName);
-                                    } else {
-                                      firstName = 'N/I';
-                                    }
-                                    return Text(
-                                      firstName,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        fontFamily: 'Montserrat',
-                                        fontSize: 15,
-                                      ),
-                                    );
-                                  },
-                                ),
-                          ],
-                        ),                                        
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+                      children: [
+                        foto(data['creatorId']),
+
+                        FutureBuilder<DocumentSnapshot>(
+                          future:
+                              FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(data['creatorId'])
+                                  .get(),
+                          builder: (context, snapUser) {
+                            String firstName = '';
+                            if (snapUser.connectionState ==
+                                ConnectionState.waiting) {
+                              firstName = 'Carregando...';
+                            } else if (snapUser.hasData &&
+                                snapUser.data!.exists) {
+                              final userData =
+                                  snapUser.data!.data() as Map<String, dynamic>;
+                              final fullName =
+                                  userData['displayName'] as String? ?? '';
+                              firstName = _getFirstName(fullName);
+                            } else {
+                              firstName = 'N/I';
+                            }
+                            return Text(
+                              firstName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.normal,
+                                fontFamily: 'Montserrat',
+                                fontSize: 15,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -268,7 +259,7 @@ class CaronaCard extends Cards {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  botao("Reservar",245, () {
+                  botao("Reservar", 245, () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -282,13 +273,13 @@ class CaronaCard extends Cards {
                     );
                   }),
                   Text(
-                       "R\$ ${data['valor'] ?? 'N/I'}",
-                       style: TextStyle(
-                         fontWeight: FontWeight.normal,
-                         fontFamily: 'Montserrat',
-                         fontSize: 20,
-                       ),
-                     ),
+                    "R\$ ${data['valor'] ?? 'N/I'}",
+                    style: TextStyle(
+                      fontWeight: FontWeight.normal,
+                      fontFamily: 'Montserrat',
+                      fontSize: 20,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -306,7 +297,7 @@ class UberCard extends Cards {
     User user,
     String documentId,
     BuildContext context,
-    ) {
+  ) {
     return Card(
       color: Color(0xFFFBFBFB),
       elevation: 4,
@@ -324,7 +315,7 @@ class UberCard extends Cards {
                 Expanded(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    
+
                     children: [
                       const SizedBox(height: 16),
                       // Horário
@@ -337,7 +328,7 @@ class UberCard extends Cards {
               ],
             ),
             const SizedBox(height: 16),
-            botao("Participar",double.infinity, () {
+            botao("Participar", double.infinity, () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
