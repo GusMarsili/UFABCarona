@@ -1,4 +1,4 @@
-import 'package:demo/pages/elements_imports.dart';
+import 'elements_imports.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -164,7 +164,7 @@ class _UberGroupDetailPage extends State<UberGroupDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBarScreen().build(),
+      appBar: AppBarScreen().build(false),
       body: StreamBuilder<DocumentSnapshot>(
         stream:
             FirebaseFirestore.instance
