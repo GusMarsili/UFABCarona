@@ -68,69 +68,64 @@ class _CaronasPageState extends State<CaronasPage> {
         ],
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: Column(
-        children: [
-          if (mostrarFiltros)
-            Column(
-              children: [
-                SizedBox(height: 5),
-                TextFieldElement(
-                  labelText: "Origem",
-                  showSearchIcon: true,
-                  haveController: true,
-                  controller: _controllerOrigem,
-                  onChanged: (_) => _filterRides(),
-                ).build(context),
-                SizedBox(height: 7),
-                TextFieldElement(
-                  labelText: "Destino",
-                  showSearchIcon: true,
-                  haveController: true,
-                  controller: _controllerDestino,
-                  onChanged: (_) => _filterRides(),
-                ).build(context),
-              ],
-            ),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: rides.orderBy('updatedAt', descending: true).snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+      body: StreamBuilder<QuerySnapshot>(
+        stream: rides.orderBy('updatedAt', descending: true).snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(
+              child: Text(
+                "Nenhuma carona encontrada.",
+                style: TextStyle(color: Colors.black),
+              ),
+            );
+          }
+          return ListView(
+            children: [
+              if (mostrarFiltros)
+                Column(
+                  children: [
+                    SizedBox(height: 5),
+                    TextFieldElement(
+                      labelText: "Origem",
+                      showSearchIcon: true,
+                      haveController: true,
+                      controller: _controllerOrigem,
+                      onChanged: (_) => _filterRides(),
+                    ).build(context),
+                    SizedBox(height: 7),
+                    TextFieldElement(
+                      labelText: "Destino",
+                      showSearchIcon: true,
+                      haveController: true,
+                      controller: _controllerDestino,
+                      onChanged: (_) => _filterRides(),
+                    ).build(context),
+                    SizedBox(height: 10),
+                  ],
+                ),
+              ...snapshot.data!.docs.map((DocumentSnapshot document) {
+                Map<String, dynamic> data =
+                    document.data() as Map<String, dynamic>;
+                if (data['origem'].toLowerCase().contains(
+                      _controllerOrigem.text.toLowerCase(),
+                    ) &&
+                    data['destino'].toLowerCase().contains(
+                      _controllerDestino.text.toLowerCase(),
+                    )) {
+                  bool isOwner = data['creatorId'] == user.uid;
+                  return CaronaCard(
+                    data: data,
+                  ).build(isOwner, user, document.id, context);
+                } else {
+                  return Container();
                 }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      "Nenhuma carona encontrada.",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                  );
-                }
-                return ListView(
-                  children:
-                      snapshot.data!.docs.map((DocumentSnapshot document) {
-                        Map<String, dynamic> data =
-                            document.data() as Map<String, dynamic>;
-                        // Verifica se a carona foi criada pelo usuário atual
-                        if (data['origem'].toLowerCase().contains(
-                              _controllerOrigem.text.toLowerCase(),
-                            ) &&
-                            data['destino'].toLowerCase().contains(
-                              _controllerDestino.text.toLowerCase(),
-                            )) {
-                          bool isOwner = data['creatorId'] == user.uid;
-                          return CaronaCard(
-                            data: data,
-                          ).build(isOwner, user, document.id, context);
-                        } else {
-                          return Container();
-                        }
-                      }).toList(),
-                );
-              },
-            ),
-          ),
-        ],
+              }),
+            ],
+          );
+        },
       ),
     );
   }
