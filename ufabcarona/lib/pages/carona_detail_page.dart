@@ -183,7 +183,9 @@ class _CaronaDetailPageState extends State<CaronaDetailPage> {
           
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
+            
             child: Column(
+              
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
 
@@ -365,6 +367,7 @@ class _CaronaDetailPageState extends State<CaronaDetailPage> {
                   },
                   context,
                 ),
+                const SizedBox(height: 100),
               ],
             ),
           );
