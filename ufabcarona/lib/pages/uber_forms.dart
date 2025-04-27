@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'elements_imports.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -19,6 +20,36 @@ class UberForms extends StatefulWidget {
 
   @override
   State<UberForms> createState() => _UberFormsState();
+}
+
+class HoraInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    // Remover tudo o que não for número
+    String digitsOnly = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // Limitar a quantidade de dígitos para 4 (HHMM)
+    if (digitsOnly.length > 4) {
+      digitsOnly = digitsOnly.substring(0, 4);
+    }
+
+    // Adiciona o ":" no meio, entre os 2 primeiros e 2 últimos dígitos
+    StringBuffer buffer = StringBuffer();
+    for (int i = 0; i < digitsOnly.length; i++) {
+      if (i == 2) buffer.write(':'); // Adiciona ":" entre os dois primeiros dígitos
+      buffer.write(digitsOnly[i]);
+    }
+
+    String formatted = buffer.toString();
+
+    
+
+    // Retorna o texto formatado e garante que o cursor esteja na posição final
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
 }
 
 class _UberFormsState extends State<UberForms> {
@@ -150,8 +181,25 @@ class _UberFormsState extends State<UberForms> {
                 TextFormField(
                   controller: _horarioController,
                   decoration: const InputDecoration(labelText: 'Horário'),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? "Informe o horário" : null,
+                  inputFormatters: [HoraInputFormatter()],  // Usa o formatador personalizado
+                  validator: (v) {
+                    if (v == null || v.isEmpty) {
+                      return "Informe o horário";
+                    }
+                
+                    // Valida o formato de HH:MM
+                    final parts = v.split(':');
+                    if (parts.length != 2) return "Formato inválido";
+                
+                    final hora = int.tryParse(parts[0]);
+                    final minuto = int.tryParse(parts[1]);
+                
+                    if (hora == null || minuto == null) return "Formato inválido";
+                    if (hora < 0 || hora > 23) return "Hora deve ser entre 00 e 23";
+                    if (minuto < 0 || minuto > 59) return "Minuto deve ser entre 00 e 59";
+                
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 10),
                 TextFormField(
