@@ -56,16 +56,16 @@ class _CaronasPageState extends State<CaronasPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.filter_alt),
-            onPressed: () {
-              setState(() {
-                mostrarFiltros = !mostrarFiltros;
-              });
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.filter_alt),
+        //     onPressed: () {
+        //       setState(() {
+        //         mostrarFiltros = !mostrarFiltros;
+        //       });
+        //     },
+        //   ),
+        // ],
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: StreamBuilder<QuerySnapshot>(
