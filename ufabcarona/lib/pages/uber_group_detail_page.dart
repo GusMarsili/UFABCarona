@@ -193,55 +193,69 @@ class _UberGroupDetailPage extends State<UberGroupDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Detalhes do Grupo Uber",
-                  style: GoogleFonts.montserrat(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                if(!widget.isOwner)
+                  Text(
+                    "Detalhes do Grupo Uber",
+                    style: GoogleFonts.montserrat(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
                   ),
-                ),
-                UberCardDetail(data: data, members: members).build(),
-
                 // Botões de ação para o criador (editar/deletar)
                 if (widget.isOwner)
                   Align(
                     alignment: Alignment.centerRight,
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                      //mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.edit,
-                            color: Colors.blue,
-                            size: 20,
+                        Text(
+                          "Detalhes do Grupo Uber",
+                          style: GoogleFonts.montserrat(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
                           ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => UberForms(
-                                      user: widget.user,
-                                      groupData: data,
-                                      groupId: widget.groupId,
-                                    ),
-                              ),
-                            );
-                          },
                         ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                            size: 20,
-                          ),
-                          onPressed: () => _deleteUberGroup(context),
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.edit,
+                                color: Colors.blue,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => UberForms(
+                                          user: widget.user,
+                                          groupData: data,
+                                          groupId: widget.groupId,
+                                        ),
+                                  ),
+                                );
+                              },
+                            ),
+                            //const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                                size: 20,
+                              ),
+                              onPressed: () => _deleteUberGroup(context),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
+                UberCardDetail(data: data, members: members).build(),
+
                 const SizedBox(height: 15),
                 // Botão Sair (para membro)
                 if (!widget.isOwner && isMember)
@@ -319,32 +333,37 @@ class _UberGroupDetailPage extends State<UberGroupDetailPage> {
                 // TODO: MELHORAR ESSA PARTE DO VISUAL
                 if (widget.isOwner && isRunning) ...[
                   const SizedBox(height: 24),
-                  Text(
-                    "Corrida em Andamento",
-                    style: GoogleFonts.montserrat(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                  Center(
+                    child: Text(
+                      "Corrida em Andamento",
+                      style: GoogleFonts.montserrat(
+                        color: Colors.amber,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => _finishGroup(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text("Finalizar Corrida"),
-                      ),
-                      OutlinedButton(
-                        onPressed: () => _groupStatus('open'),
-                        child: const Text("Voltar"),
-                      ),
-                    ],
+                   buttonAction(
+                    Colors.red,
+                    Colors.white,
+                    "Finalizar Corrida",
+                    () {
+                      _finishGroup(context);
+                    },
+                    context,
                   ),
+                  const SizedBox(height: 12),
+                  buttonAction(
+                      Colors.green,
+                      Colors.white,
+                      "Reiniciar Corrida",
+                      () {
+                        _groupStatus('open');
+                      },
+                      context,
+                    ),
+                  
                 ],
                 const SizedBox(height: 12),
                 buttonAction(
