@@ -534,18 +534,55 @@ class CaronaCardDetail extends Cards {
             const SizedBox(height: 15),
             carro(), //marca, modelo e placa do carro
             SizedBox(height: 15),
-            Text(
-                  
-                    "Paradas: ${data['paradas'] ?? '0'}",
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Paradas:",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Montserrat',
+                    fontSize: 15,
+                  ),
+                ),
+                if (data['paradas'] != null && data['paradas'].isNotEmpty) ...[
+                  // Exibindo cada parada com bullet points
+                  for (var parada in data['paradas']) 
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2.0),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.circle, size: 6, color: Colors.black),  // Bullet point
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              parada,
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontSize: 15,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ] else ...[
+                  // Caso não haja paradas
+                  Text(
+                    "Sem Paradas",
                     style: TextStyle(
-                      fontWeight: FontWeight.normal,
                       fontFamily: 'Montserrat',
                       fontSize: 15,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
+                ],
+              ],
+            ),
             SizedBox(height: 15),
             Text(
-              "Criador(a):",
+              "Motorista:",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Montserrat',
@@ -556,7 +593,7 @@ class CaronaCardDetail extends Cards {
             foto(data['creatorId'], size: 30, returnName: true),
             const SizedBox(height: 15),
             Text(
-              "Participantes:",
+              "Passageiros:",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Montserrat',
@@ -601,7 +638,7 @@ class CaronaCardDetail extends Cards {
               })
             else ...[
               Text(
-                "Nenhum participante ainda.",
+                "Nenhum passageiro ainda.",
                 style: GoogleFonts.montserrat(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
