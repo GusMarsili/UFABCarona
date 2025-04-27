@@ -4,6 +4,7 @@ import 'carona_detail_page.dart';
 import 'uber_group_detail_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 // import 'package:cached_network_image/cached_network_image.dart';
 
 class AppBarScreen {
@@ -217,7 +218,9 @@ abstract class Cards {
                   photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
               child:
                   photoUrl.isEmpty
-                      ? Text(
+                      ? 
+                      
+                      Text(
                         (userData['displayName'] as String? ?? '')
                             .substring(0, 1)
                             .toUpperCase(),
@@ -227,9 +230,13 @@ abstract class Cards {
             ),
             if (returnName) const SizedBox(width: 8),
             if (returnName)
-              Text(
-                userData['displayName'] ?? 'N/I',
-                style: GoogleFonts.montserrat(fontSize: 16),
+              Expanded(
+                child: AutoSizeText(
+                  userData['displayName'] ?? 'N/I',
+                  style: GoogleFonts.montserrat(fontSize: 16),
+                  maxLines: 1,
+                  minFontSize: 12,
+                ),
               ),
           ],
         );
@@ -440,6 +447,7 @@ class UberCardDetail extends Cards {
             const SizedBox(height: 15),
             foto(data['creatorId'], size: 30, returnName: true),
             const SizedBox(height: 15),
+            
             Text(
               "Participantes:",
               style: TextStyle(
@@ -473,9 +481,14 @@ class UberCardDetail extends Cards {
                           children: [
                             foto(member, size: 30),
                             const SizedBox(width: 10),
-                            Text(
-                              userData['displayName'] ?? 'N/I',
-                              style: GoogleFonts.montserrat(fontSize: 16),
+
+                            Expanded(
+                              child: AutoSizeText(
+                                userData['displayName'] ?? 'N/I',
+                                style: GoogleFonts.montserrat(fontSize: 16),
+                                maxLines: 1,
+                                minFontSize: 12,
+                              ),
                             ),
                           ],
                         ),
@@ -581,6 +594,7 @@ class CaronaCardDetail extends Cards {
               ],
             ),
             SizedBox(height: 15),
+            
             Text(
               "Motorista:",
               style: TextStyle(
@@ -625,9 +639,14 @@ class CaronaCardDetail extends Cards {
                           children: [
                             foto(member, size: 30),
                             const SizedBox(width: 10),
-                            Text(
-                              userData['displayName'] ?? 'N/I',
-                              style: GoogleFonts.montserrat(fontSize: 16),
+                            
+                            Expanded(
+                              child: AutoSizeText(
+                                userData['displayName'] ?? 'N/I',
+                                style: GoogleFonts.montserrat(fontSize: 16),
+                                maxLines: 1,
+                                minFontSize: 12,
+                              ),
                             ),
                           ],
                         ),
