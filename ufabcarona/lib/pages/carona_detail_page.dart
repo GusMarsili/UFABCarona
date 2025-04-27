@@ -328,35 +328,40 @@ class _CaronaDetailPageState extends State<CaronaDetailPage> {
                 
                 // Indicador e botões "Finalizar" / "Voltar"
                 if (widget.isOwner && isRunning) ...[
-                  const SizedBox(height: 24),
-                  Text(
-                    "Corrida em andamento",
-                    style: GoogleFonts.montserrat(
-                      color: Colors.amber,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  //const SizedBox(height: 24),
+                  Center(
+                    child: Text(
+                      "Corrida em andamento",
+                      style: GoogleFonts.montserrat(
+                        color: Colors.amber,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => _finishRide(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text("Finalizar Corrida"),
-                      ),
-                      OutlinedButton(
-                        onPressed: () => _rideStatus('open'),
-                        child: const Text("Voltar"),
-                      ),
-                    ],
+                  buttonAction(
+                    Colors.red,
+                    Colors.white,
+                    "Finalizar Corrida",
+                    () {
+                      _finishRide(context);
+                    },
+                    context,
                   ),
+                  const SizedBox(height: 12),
+                  buttonAction(
+                      Colors.green,
+                      Colors.white,
+                      "Reiniciar Corrida",
+                      () {
+                        _rideStatus('open');
+                      },
+                      context,
+                    ),
                   
                 ],
+                
                 const SizedBox(height: 12),
                   buttonAction(
                   const Color.fromARGB(255, 238, 231, 231),
