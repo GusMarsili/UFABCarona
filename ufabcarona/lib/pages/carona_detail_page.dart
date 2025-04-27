@@ -311,7 +311,7 @@ class _CaronaDetailPageState extends State<CaronaDetailPage> {
                     context,
                   ),
                   
-                const SizedBox(height: 24),
+                //const SizedBox(height: 24),
                 
             
                 // Botão "Começar Corrida" (para o criador)
