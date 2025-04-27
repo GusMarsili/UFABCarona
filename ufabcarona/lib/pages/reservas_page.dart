@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rxdart/rxdart.dart';
-import 'carona_detail_page.dart';
-import 'uber_group_detail_page.dart';
+import 'package:ufabcarona/pages/elements_imports.dart';
+
 
 class ReservasPage extends StatelessWidget {
   final User user;
@@ -61,38 +61,10 @@ class ReservasPage extends StatelessWidget {
                     final doc = docs[index];
                     final data = doc.data() as Map<String, dynamic>;
                     final isOwner = data['creatorId'] == user.uid;
-                    return Card(
-                      color: Colors.white,
-                      margin: const EdgeInsets.symmetric(vertical: 6),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                      child: ListTile(
-                        title: Text(
-                          'Destino: ${data['destino'] ?? 'N/I'}',
-                          style: GoogleFonts.montserrat(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        subtitle: Text(
-                          'Origem: ${data['origem'] ?? 'N/I'}',
-                          style: GoogleFonts.montserrat(),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CaronaDetailPage(
-                                user: user,
-                                rideId: doc.id,
-                                isOwner: isOwner,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
+                    return CaronaReservaCard(
+                            data: data,
+                          ).build(isOwner, user, doc.id, context);
+                    
                   },
                 );
               },
@@ -128,38 +100,10 @@ class ReservasPage extends StatelessWidget {
                     final doc = docs[index];
                     final data = doc.data() as Map<String, dynamic>;
                     final isOwner = data['creatorId'] == user.uid;
-                    return Card(
-                      color: Colors.white,
-                      margin: const EdgeInsets.symmetric(vertical: 6),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                      child: ListTile(
-                        title: Text(
-                          'Destino: ${data['destino'] ?? 'N/I'}',
-                          style: GoogleFonts.montserrat(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        subtitle: Text(
-                          'Origem: ${data['origem'] ?? 'N/I'}',
-                          style: GoogleFonts.montserrat(),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => UberGroupDetailPage(
-                                user: user,
-                                groupId: doc.id,
-                                isOwner: isOwner,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
+                    return UberReservaCard(
+                            data: data,
+                          ).build(isOwner, user, doc.id, context);
+                    
                   },
                 );
               },
@@ -206,48 +150,17 @@ class ReservasPage extends StatelessWidget {
                     final data = doc.data() as Map<String, dynamic>;
                     final isRide = doc.reference.parent.id == 'rides';
 
-                    return Card(
-                      color: Colors.white,
-                      margin: const EdgeInsets.symmetric(vertical: 6),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                      child: ListTile(
-                        title: Text(
-                          'Destino: ${data['destino'] ?? 'N/I'}',
-                          style: GoogleFonts.montserrat(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        subtitle: Text(
-                          'Origem: ${data['origem'] ?? 'N/I'}',
-                          style: GoogleFonts.montserrat(),
-                        ),
-                        trailing: Text(
-                          isRide ? 'Carona' : 'Uber',
-                          style: GoogleFonts.montserrat(fontSize: 12),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => isRide
-                                  ? CaronaDetailPage(
-                                      user: user,
-                                      rideId: doc.id,
-                                      isOwner: true,
-                                    )
-                                  : UberGroupDetailPage(
-                                      user: user,
-                                      groupId: doc.id,
-                                      isOwner: true,
-                                    ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
+                    return isRide ? CaronaReservaCard(
+                            data: data,
+                          ).build(true, user, doc.id, context)
+                          :
+                          UberReservaCard(
+                            data: data,
+                          ).build(true, user, doc.id, context);
+
+
+
+                    
                   },
                 );
               },
