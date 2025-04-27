@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import 'carona_detail_page.dart';
 import 'uber_group_detail_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -346,7 +347,8 @@ class CaronaCard extends Cards {
                     );
                   }),
                   Text(
-                    "R\$ ${data['valor'] ?? 'N/I'}",
+                    "R\$${data['valor'] ?? 'N/I'}",
+                    
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
                       fontFamily: 'Montserrat',
@@ -882,6 +884,9 @@ class CaronaReservaCard extends Cards {
     );
   }
 }
+
+
+
 
 class TextFieldElement {
   final String labelText;
