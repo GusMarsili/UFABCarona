@@ -122,7 +122,8 @@ class _CaronasPageState extends State<CaronasPage> {
                           data['destino'].toLowerCase().contains(
                             _controllerDestino.text.toLowerCase(),
                           ) &&
-                          vagasDisponiveis > 0) {
+                          vagasDisponiveis > 0
+                          && data['status'] != 'running') {
                         bool isOwner = data['creatorId'] == user.uid;
                         return CaronaCard(
                           data: data,
