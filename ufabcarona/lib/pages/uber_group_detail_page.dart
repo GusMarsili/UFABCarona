@@ -260,7 +260,7 @@ class _UberGroupDetailPage extends State<UberGroupDetailPage> {
                 // Botão Sair (para membro)
                 if (!widget.isOwner && isMember)
                   buttonAction(
-                    Colors.red,
+                    Color(0xFFFF0000),
                     Colors.white,
                     "Sair",
                     () async {
@@ -345,7 +345,7 @@ class _UberGroupDetailPage extends State<UberGroupDetailPage> {
                   ),
                   const SizedBox(height: 12),
                    buttonAction(
-                    Colors.red,
+                    Color(0xFFFF0000),
                     Colors.white,
                     "Finalizar Corrida",
                     () {
