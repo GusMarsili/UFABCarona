@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'elements_imports.dart';
-import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+//import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 
 
 class CaronaForms extends StatefulWidget {
@@ -21,6 +22,52 @@ class CaronaForms extends StatefulWidget {
 
   @override
   State<CaronaForms> createState() => _CaronaFormsState();
+}
+
+class HoraInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    // Remover tudo o que não for número
+    String digitsOnly = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // Limitar a quantidade de dígitos para 4 (HHMM)
+    if (digitsOnly.length > 4) {
+      digitsOnly = digitsOnly.substring(0, 4);
+    }
+
+    // Adiciona o ":" no meio, entre os 2 primeiros e 2 últimos dígitos
+    StringBuffer buffer = StringBuffer();
+    for (int i = 0; i < digitsOnly.length; i++) {
+      if (i == 2) buffer.write(':'); // Adiciona ":" entre os dois primeiros dígitos
+      buffer.write(digitsOnly[i]);
+    }
+
+    String formatted = buffer.toString();
+
+    // Garantir que a hora não passe de 23
+    if (formatted.length >= 2) {
+      int hora = int.tryParse(formatted.substring(0, 2)) ?? 0;
+      if (hora > 23) {
+        hora = 23;
+      }
+      formatted = hora.toString().padLeft(2, '0') + formatted.substring(2);
+    }
+
+    // Garantir que o minuto não passe de 59
+    if (formatted.length >= 5) {
+      int minuto = int.tryParse(formatted.substring(3, 5)) ?? 0;
+      if (minuto > 59) {
+        minuto = 59;
+      }
+      formatted = formatted.substring(0, 3) + minuto.toString().padLeft(2, '0');
+    }
+
+    // Retorna o texto formatado e garante que o cursor esteja na posição final
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
 }
 
 class _CaronaFormsState extends State<CaronaForms> {
@@ -209,8 +256,25 @@ class _CaronaFormsState extends State<CaronaForms> {
                 TextFormField(
                   controller: _horarioController,
                   decoration: const InputDecoration(labelText: 'Horário'),
-                  validator: (v) => v == null || v.isEmpty ? "Informe o horário" : null,
-                  inputFormatters: [MaskedInputFormatter('##:##')],
+                  inputFormatters: [HoraInputFormatter()],  // Usa o formatador personalizado
+                  validator: (v) {
+                    if (v == null || v.isEmpty) {
+                      return "Informe o horário";
+                    }
+                
+                    // Valida o formato de HH:MM
+                    final parts = v.split(':');
+                    if (parts.length != 2) return "Formato inválido";
+                
+                    final hora = int.tryParse(parts[0]);
+                    final minuto = int.tryParse(parts[1]);
+                
+                    if (hora == null || minuto == null) return "Formato inválido";
+                    if (hora < 0 || hora > 23) return "Hora deve ser entre 00 e 23";
+                    if (minuto < 0 || minuto > 59) return "Minuto deve ser entre 00 e 59";
+                
+                    return null;
+                  },
                 ),
                 SizedBox(height: spacing),
                 TextFormField(
@@ -253,6 +317,7 @@ class _CaronaFormsState extends State<CaronaForms> {
                   decoration: const InputDecoration(labelText: 'Valor'),
                   validator: (v) => v == null || v.isEmpty ? "Informe o valor" : null,
                   keyboardType: TextInputType.number,
+                  
                   
                 ),
                 SizedBox(height: spacing),
