@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ufabcarona/pages/faq_page.dart';
+import 'package:ufabcarona/pages/reportar_page.dart';
 import 'historico_page.dart';
 
 class PerfilPage extends StatelessWidget {
@@ -115,6 +117,12 @@ class PerfilPage extends StatelessWidget {
                 height: MediaQuery.of(context).size.height * 0.06,
                 child: ElevatedButton(
                   onPressed: ()  {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReportarPage(),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFBFBFB),
@@ -153,6 +161,12 @@ class PerfilPage extends StatelessWidget {
                 height: MediaQuery.of(context).size.height * 0.06,
                 child: ElevatedButton(
                   onPressed: ()  {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => FaqPage(),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFBFBFB),
