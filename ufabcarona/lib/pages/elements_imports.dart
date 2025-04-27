@@ -71,12 +71,16 @@ abstract class Cards {
           SizedBox(width: 8),
           Image.asset('lib/images/arrow.png', height: 12),
           SizedBox(width: 8),
-          Text(
-            formatarPrimeiraLetra(data['destino']),
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Montserrat',
-              fontSize: 15,
+          Expanded(
+            child: AutoSizeText(
+              formatarPrimeiraLetra(data['destino']),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Montserrat',
+                fontSize: 15,
+              ),
+              maxLines: 1,
+              minFontSize: 12,
             ),
           ),
         ],
@@ -717,7 +721,29 @@ class UberReservaCard extends Cards {
                  ),
                );
              },
-             child: Container(
+             child: data['status'] == 'running' ?
+             Container(
+               width: double.infinity,
+               padding: const EdgeInsets.symmetric(vertical: 14),
+               decoration: const BoxDecoration(
+                 color: Color(0xFFFFCC00), // Verde escuro
+                 borderRadius: BorderRadius.only(
+                   bottomLeft: Radius.circular(16),
+                   bottomRight: Radius.circular(16),
+                 ),
+               ),
+               alignment: Alignment.center,
+               child: const Text(
+                 'Corrida Em Andamento',
+                 style: TextStyle(
+                   color: Colors.black,
+                   fontWeight: FontWeight.bold,
+                   fontFamily: 'Montserrat',
+                   fontSize: 16,
+                 ),
+               ),
+             )
+             : Container(
                width: double.infinity,
                padding: const EdgeInsets.symmetric(vertical: 14),
                decoration: const BoxDecoration(
@@ -857,7 +883,30 @@ class CaronaReservaCard extends Cards {
                  ),
                );
              },
-             child: Container(
+             child: 
+             data['status'] == 'running' ?
+             Container(
+               width: double.infinity,
+               padding: const EdgeInsets.symmetric(vertical: 14),
+               decoration: const BoxDecoration(
+                 color: Color(0xFFFFCC00), // Verde escuro
+                 borderRadius: BorderRadius.only(
+                   bottomLeft: Radius.circular(16),
+                   bottomRight: Radius.circular(16),
+                 ),
+               ),
+               alignment: Alignment.center,
+               child: const Text(
+                 'Corrida Em Andamento',
+                 style: TextStyle(
+                   color: Colors.black,
+                   fontWeight: FontWeight.bold,
+                   fontFamily: 'Montserrat',
+                   fontSize: 16,
+                 ),
+               ),
+             )
+             : Container(
                width: double.infinity,
                padding: const EdgeInsets.symmetric(vertical: 14),
                decoration: const BoxDecoration(
