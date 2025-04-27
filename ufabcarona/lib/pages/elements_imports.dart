@@ -378,7 +378,7 @@ class UberCard extends Cards {
     BuildContext context,
   ) {
     final List<dynamic> members = data['members'] ?? [];
-    int vagasDisponiveis = calcularVagas(3, members);
+    int vagasDisponiveis = calcularVagas(2, members);
     return Card(
       color: Color(0xFFFBFBFB),
       elevation: 4,
@@ -424,7 +424,7 @@ class UberCardDetail extends Cards {
 
   Widget build() {
     final List<dynamic> members = data['members'] ?? [];
-    int vagasDisponiveis = calcularVagas(3, members);
+    int vagasDisponiveis = calcularVagas(2, members);
     return Card(
       color: Color(0xFFFBFBFB),
       elevation: 4,
@@ -685,7 +685,7 @@ class UberReservaCard extends Cards {
     BuildContext context,
   ) {
     final List<dynamic> members = data['members'] ?? [];
-    int vagasDisponiveis = calcularVagas(3, members);
+    int vagasDisponiveis = calcularVagas(2, members);
     return Card(
       color: Color(0xFFFBFBFB),
       elevation: 4,
