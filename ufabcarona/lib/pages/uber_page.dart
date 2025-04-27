@@ -115,7 +115,7 @@ class _UberPageState extends State<UberPage> {
                       
                       final List<dynamic> members = data['members'] ?? [];
                       
-                      final int vagasDisponiveis = 3 - members.length;
+                      final int vagasDisponiveis = 2 - members.length;
                       // Verifica se a carona foi criada pelo usuário atual
                       if (data['origem'].toLowerCase().contains(
                             _controllerOrigem.text.toLowerCase(),
