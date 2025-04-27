@@ -54,7 +54,15 @@ class _CaronaFormsState extends State<CaronaForms> {
       _modeloController.text = widget.rideData!['modelo'] ?? '';
       _placaController.text = widget.rideData!['placa'] ?? '';
       _valorController.text = widget.rideData!['valor'] ?? '';
-      _paradasController.text = widget.rideData!['paradas'] ?? '';
+      if (widget.rideData!['paradas'] != null) {
+        List<dynamic> paradas = widget.rideData!['paradas'];
+        _numParadas = paradas.length;
+        _paradaControllers = List.generate(_numParadas, (index) {
+          TextEditingController controller = TextEditingController();
+          controller.text = paradas[index];
+          return controller;
+        });
+      }
     }
   }
 
