@@ -254,7 +254,7 @@ class _CaronaDetailPageState extends State<CaronaDetailPage> {
                 // // Botão Sair (para membro)
                 if (!widget.isOwner && isMember)
                   buttonAction(
-                    Colors.red,
+                    Color(0xFFFF0000),
                     Colors.white,
                     "Sair",
                     () async {
@@ -341,7 +341,7 @@ class _CaronaDetailPageState extends State<CaronaDetailPage> {
                   ),
                   const SizedBox(height: 12),
                   buttonAction(
-                    Colors.red,
+                    Color(0xFFFF0000),
                     Colors.white,
                     "Finalizar Corrida",
                     () {
