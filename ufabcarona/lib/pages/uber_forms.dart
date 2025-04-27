@@ -9,7 +9,7 @@ class UberForms extends StatefulWidget {
   // Parâmetros opcionais para edição:
   final Map<String, dynamic>? groupData;
   final String? groupId;
-
+  
   const UberForms({
     super.key,
     required this.user,
@@ -28,8 +28,7 @@ class _UberFormsState extends State<UberForms> {
   final TextEditingController _origemController = TextEditingController();
   final TextEditingController _destinoController = TextEditingController();
   final TextEditingController _horarioController = TextEditingController();
-  final TextEditingController _pontoEncontroController =
-      TextEditingController();
+  final TextEditingController _pontoEncontroController = TextEditingController();
 
   @override
   void initState() {
@@ -64,7 +63,7 @@ class _UberFormsState extends State<UberForms> {
           'pontoEncontro': _pontoEncontroController.text,
           'members': <String>[],
           'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(), 
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Grupo Uber criado com sucesso!")),
@@ -74,12 +73,12 @@ class _UberFormsState extends State<UberForms> {
             .collection('uberGroups')
             .doc(widget.groupId)
             .update({
-              'origem': _origemController.text,
-              'destino': _destinoController.text,
-              'horario': _horarioController.text,
-              'pontoEncontro': _pontoEncontroController.text,
-              'updatedAt': FieldValue.serverTimestamp(),
-            });
+          'origem': _origemController.text,
+          'destino': _destinoController.text,
+          'horario': _horarioController.text,
+          'pontoEncontro': _pontoEncontroController.text,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Grupo Uber atualizado com sucesso!")),
         );
@@ -110,8 +109,9 @@ class _UberFormsState extends State<UberForms> {
 
   @override
   Widget build(BuildContext context) {
-    final title =
-        widget.groupData == null ? "Criar Grupo Uber" : "Modificar Grupo Uber";
+    final title = widget.groupData == null
+        ? "Criar Grupo Uber"
+        : "Modificar Grupo Uber";
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -136,43 +136,31 @@ class _UberFormsState extends State<UberForms> {
                 TextFormField(
                   controller: _origemController,
                   decoration: const InputDecoration(labelText: 'Origem'),
-                  validator:
-                      (value) =>
-                          value == null || value.isEmpty
-                              ? "Informe a origem"
-                              : null,
+                  validator: (value) =>
+                      value == null || value.isEmpty ? "Informe a origem" : null,
                 ),
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: _destinoController,
                   decoration: const InputDecoration(labelText: 'Destino'),
-                  validator:
-                      (value) =>
-                          value == null || value.isEmpty
-                              ? "Informe o destino"
-                              : null,
+                  validator: (value) =>
+                      value == null || value.isEmpty ? "Informe o destino" : null,
                 ),
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: _horarioController,
                   decoration: const InputDecoration(labelText: 'Horário'),
-                  validator:
-                      (value) =>
-                          value == null || value.isEmpty
-                              ? "Informe o horário"
-                              : null,
+                  validator: (value) =>
+                      value == null || value.isEmpty ? "Informe o horário" : null,
                 ),
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: _pontoEncontroController,
-                  decoration: const InputDecoration(
-                    labelText: 'Ponto de Encontro',
-                  ),
-                  validator:
-                      (value) =>
-                          value == null || value.isEmpty
-                              ? "Informe o ponto de encontro"
-                              : null,
+                  decoration: const InputDecoration(labelText: 'Ponto de Encontro'),
+                  validator: (value) =>
+                      value == null || value.isEmpty
+                          ? "Informe o ponto de encontro"
+                          : null,
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
@@ -181,30 +169,22 @@ class _UberFormsState extends State<UberForms> {
                   child: ElevatedButton(
                     onPressed: _saveUberGroup,
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black,
+                      foregroundColor: Colors.white,
                       backgroundColor: const Color(0xFF336600),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       textStyle: const TextStyle(fontSize: 20),
+                      elevation: 4, // <<< Aqui adiciona a sombra
+                      shadowColor: Color(0xFF000000), // <<< Define a cor da sombra
                     ),
-                    child:
-                        widget.groupData == null
-                            ? const Text(
-                              "Criar",
-                              style: TextStyle(
-                                fontFamily: "Poppins",
-                                fontSize: 20,
-                              ),
-                            )
-                            : const Text(
-                              "Salvar",
-                              style: TextStyle(
-                                fontFamily: "Poppins",
-                                fontSize: 20,
-                              ),
-                            ),
+                    child: widget.groupData == null
+                        ? const Text(
+                            "Criar",
+                            style: TextStyle(fontFamily: "Poppins", fontSize: 20),
+                          )
+                        : const Text(
+                            "Salvar",
+                            style: TextStyle(fontFamily: "Poppins", fontSize: 20),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 20),
