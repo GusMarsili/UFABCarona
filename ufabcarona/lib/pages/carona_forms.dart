@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'elements_imports.dart';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+
 
 class CaronaForms extends StatefulWidget {
   final User user;
@@ -36,6 +38,9 @@ class _CaronaFormsState extends State<CaronaForms> {
   final TextEditingController _valorController = TextEditingController();
   final TextEditingController _paradasController = TextEditingController();
 
+  int _numParadas = 0;  // Controla o número de paradas a serem exibidas
+  List<TextEditingController> _paradaControllers = [];  // Lista de controladores para as paradas
+
   @override
   void initState() {
     super.initState();
@@ -65,11 +70,29 @@ class _CaronaFormsState extends State<CaronaForms> {
     _placaController.dispose();
     _valorController.dispose();
     _paradasController.dispose();
+    for (var controller in _paradaControllers) {
+      controller.dispose();
+    }
     super.dispose();
+  }
+
+  void _updateParadas(int numParadas) {
+    setState(() {
+      _numParadas = numParadas;
+
+      // Atualiza a lista de controladores para o número de paradas
+      _paradaControllers = List.generate(numParadas, (index) => TextEditingController());
+    });
   }
 
   Future<void> _saveCarona() async {
     if (_formKey.currentState!.validate()) {
+      // Cria uma lista com as paradas
+      List<String> paradas = [];
+      for (var controller in _paradaControllers) {
+        paradas.add(controller.text);  // Adiciona o texto de cada campo de parada
+      }
+
       if (widget.rideData == null) {
         await FirebaseFirestore.instance.collection('rides').add({
           'creatorId': widget.user.uid,
@@ -83,7 +106,7 @@ class _CaronaFormsState extends State<CaronaForms> {
           'modelo': _modeloController.text,
           'placa': _placaController.text,
           'valor': _valorController.text,
-          'paradas': _paradasController.text,
+          'paradas': paradas,
           'members': <String>[],
           'createdAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
@@ -102,7 +125,7 @@ class _CaronaFormsState extends State<CaronaForms> {
           'modelo': _modeloController.text,
           'placa': _placaController.text,
           'valor': _valorController.text,
-          'paradas': _paradasController.text,
+          'paradas': paradas,
           'updatedAt': FieldValue.serverTimestamp(),
         });
         ScaffoldMessenger.of(context).showSnackBar(
@@ -121,6 +144,9 @@ class _CaronaFormsState extends State<CaronaForms> {
       _placaController.clear();
       _valorController.clear();
       _paradasController.clear();
+      for (var controller in _paradaControllers) {
+      controller.clear();
+    }
 
       // Modal de loading
       showDialog(
@@ -176,6 +202,7 @@ class _CaronaFormsState extends State<CaronaForms> {
                   controller: _horarioController,
                   decoration: const InputDecoration(labelText: 'Horário'),
                   validator: (v) => v == null || v.isEmpty ? "Informe o horário" : null,
+                  inputFormatters: [MaskedInputFormatter('##:##')],
                 ),
                 SizedBox(height: spacing),
                 TextFormField(
@@ -217,12 +244,29 @@ class _CaronaFormsState extends State<CaronaForms> {
                   controller: _valorController,
                   decoration: const InputDecoration(labelText: 'Valor'),
                   validator: (v) => v == null || v.isEmpty ? "Informe o valor" : null,
+                  keyboardType: TextInputType.number,
+                  
                 ),
                 SizedBox(height: spacing),
                 TextFormField(
                   controller: _paradasController,
                   decoration: const InputDecoration(labelText: 'Paradas'),
                   validator: (v) => v == null || v.isEmpty ? "Informe as paradas" : null,
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    int num = int.tryParse(value) ?? 0;
+                    _updateParadas(num);  // Atualiza o número de paradas dinamicamente
+                  },
+                ),
+                // Campos de parada dinâmicos
+                Column(
+                  children: List.generate(_numParadas, (index) {
+                    return TextFormField(
+                      controller: _paradaControllers[index],
+                      decoration: InputDecoration(labelText: 'Parada ${index + 1}'),
+                      validator: (v) => v == null || v.isEmpty ? "Informe a parada ${index + 1}" : null,
+                    );
+                  }),
                 ),
                 SizedBox(height: spacing),
                 SizedBox(
