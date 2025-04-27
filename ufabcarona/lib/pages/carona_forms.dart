@@ -5,7 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'elements_imports.dart';
 //import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+//import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
+//final _realFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
 class CaronaForms extends StatefulWidget {
   final User user;
@@ -44,23 +47,7 @@ class HoraInputFormatter extends TextInputFormatter {
 
     String formatted = buffer.toString();
 
-    // Garantir que a hora não passe de 23
-    if (formatted.length >= 2) {
-      int hora = int.tryParse(formatted.substring(0, 2)) ?? 0;
-      if (hora > 23) {
-        hora = 23;
-      }
-      formatted = hora.toString().padLeft(2, '0') + formatted.substring(2);
-    }
-
-    // Garantir que o minuto não passe de 59
-    if (formatted.length >= 5) {
-      int minuto = int.tryParse(formatted.substring(3, 5)) ?? 0;
-      if (minuto > 59) {
-        minuto = 59;
-      }
-      formatted = formatted.substring(0, 3) + minuto.toString().padLeft(2, '0');
-    }
+    
 
     // Retorna o texto formatado e garante que o cursor esteja na posição final
     return TextEditingValue(
@@ -69,6 +56,27 @@ class HoraInputFormatter extends TextInputFormatter {
     );
   }
 }
+
+class CurrencyInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    final value = double.parse(newValue.text) / 100;
+    final newText = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(value);
+
+    return TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: newText.length),
+    );
+  }
+}
+
 
 class _CaronaFormsState extends State<CaronaForms> {
   final _formKey = GlobalKey<FormState>();
@@ -148,6 +156,16 @@ class _CaronaFormsState extends State<CaronaForms> {
         paradas.add(controller.text);  // Adiciona o texto de cada campo de parada
       }
 
+      String valorTexto = _valorController.text;
+
+      // Limpar símbolos e formatar corretamente
+      valorTexto = valorTexto.replaceAll('R\$', '')
+                             .replaceAll('.', '')
+                             .replaceAll(',', '.')
+                             .trim();
+
+      double valorDouble = double.tryParse(valorTexto) ?? 0.0;
+
       if (widget.rideData == null) {
         await FirebaseFirestore.instance.collection('rides').add({
           'creatorId': widget.user.uid,
@@ -160,7 +178,7 @@ class _CaronaFormsState extends State<CaronaForms> {
           'marca': _marcaController.text,
           'modelo': _modeloController.text,
           'placa': _placaController.text,
-          'valor': _valorController.text,
+          'valor': valorDouble,
           'paradas': paradas,
           'members': <String>[],
           'createdAt': FieldValue.serverTimestamp(),
@@ -317,6 +335,10 @@ class _CaronaFormsState extends State<CaronaForms> {
                   decoration: const InputDecoration(labelText: 'Valor'),
                   validator: (v) => v == null || v.isEmpty ? "Informe o valor" : null,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    CurrencyInputFormatter(),
+                  ],
                   
                   
                 ),
@@ -352,6 +374,8 @@ class _CaronaFormsState extends State<CaronaForms> {
                       backgroundColor: const Color(0xFFFFCC00),
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       textStyle: const TextStyle(fontSize: 20),
+                      elevation: 4, // <<< Aqui adiciona a sombra
+                      shadowColor: Color(0xFF000000), // <<< Define a cor da sombra
                     ),
                     child: widget.rideData == null
                         ? const Text("Criar", style: TextStyle(fontFamily: "Poppins", fontSize: 20))
