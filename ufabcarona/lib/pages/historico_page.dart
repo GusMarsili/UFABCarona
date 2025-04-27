@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:iconly/iconly.dart';
 import 'package:intl/intl.dart';
 import 'historico_carona_detail_page.dart';
 import 'historico_uber_detail_page.dart';
@@ -53,9 +54,34 @@ class HistoricoPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final ride = rides[index].data() as Map<String, dynamic>;
               return Card(
-                color: Colors.white,
+                color: Color(0xFFFBFBFB),
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: ListTile(
+                  leading: Container(
+                    width: 45,  // Definindo largura e altura para deixar quadrado
+                    height: 45,
+                    decoration: BoxDecoration(
+                      color: ride['type'] == 'carona'
+                      ? Color(0xFFFFCC00)
+                      : Color(0xFF336600), // Cor de fundo do quadrado
+                      borderRadius: BorderRadius.circular(8), // Arredonda um pouco, opcional
+                    ),
+                    alignment: Alignment.center, // Centraliza o ícone
+                    child: ride['type'] == 'carona'
+                      ?
+                      const Icon(
+                      Icons.directions_car, // Ícone que você quiser
+                      color: Colors.white, // Cor do ícone
+                      size: 35,)
+                      :
+                      const Icon(
+                      IconlyBold.user_3, // Ícone que você quiser
+                      color: Colors.white, // Cor do ícone
+                      size: 35,)
+                    
+                      
+                    
+                  ),
                   title: Text('${ride['origem']} → ${ride['destino']}'),
                   subtitle: Text('Data: ${_formatTimestamp(ride['finishedAt'])}'),
                   trailing: const Icon(Icons.arrow_forward_ios),
