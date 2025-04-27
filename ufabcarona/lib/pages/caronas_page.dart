@@ -56,85 +56,85 @@ class _CaronasPageState extends State<CaronasPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        // actions: [
-        //   IconButton(
-        //     icon: Icon(Icons.filter_alt),
-        //     onPressed: () {
-        //       setState(() {
-        //         mostrarFiltros = !mostrarFiltros;
-        //       });
-        //     },
-        //   ),
-        // ],
+        /*actions: [
+          IconButton(
+            icon: Icon(Icons.filter_alt),
+            onPressed: () {
+              setState(() {
+                mostrarFiltros = !mostrarFiltros;
+              });
+            },
+          ),
+        ],*/
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: rides.orderBy('updatedAt', descending: true).snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(
-              child: Text(
-                "Nenhuma carona encontrada.",
-                style: TextStyle(color: Colors.black),
-              ),
-            );
-          }
+      body: ListView(
+        children: [
+          if (mostrarFiltros)
+            Column(
+              children: [
+                SizedBox(height: 5),
+                TextFieldElement(
+                  labelText: "Origem",
+                  showSearchIcon: true,
+                  haveController: true,
+                  controller: _controllerOrigem,
+                  onChanged: (_) => _filterRides(),
+                ).build(context),
+                SizedBox(height: 7),
+                TextFieldElement(
+                  labelText: "Destino",
+                  showSearchIcon: true,
+                  haveController: true,
+                  controller: _controllerDestino,
+                  onChanged: (_) => _filterRides(),
+                ).build(context),
+                SizedBox(height: 10),
+              ],
+            ),
+          StreamBuilder<QuerySnapshot>(
+            stream: rides.orderBy('updatedAt', descending: true).snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Center(
+                  child: Text(
+                    "Nenhuma carona encontrada.",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                );
+              }
+              return Column(
+                children:
+                    snapshot.data!.docs.map((DocumentSnapshot document) {
+                      Map<String, dynamic> data =
+                          document.data() as Map<String, dynamic>;
 
-          
+                      final List<dynamic> members = data['members'] ?? [];
+                      final int vagasTotais = data['vagas'];
+                      final int vagasDisponiveis = vagasTotais - members.length;
 
-          return ListView(
-            children: [
-              if (mostrarFiltros)
-                Column(
-                  children: [
-                    SizedBox(height: 5),
-                    TextFieldElement(
-                      labelText: "Origem",
-                      showSearchIcon: true,
-                      haveController: true,
-                      controller: _controllerOrigem,
-                      onChanged: (_) => _filterRides(),
-                    ).build(context),
-                    SizedBox(height: 7),
-                    TextFieldElement(
-                      labelText: "Destino",
-                      showSearchIcon: true,
-                      haveController: true,
-                      controller: _controllerDestino,
-                      onChanged: (_) => _filterRides(),
-                    ).build(context),
-                    SizedBox(height: 10),
-                  ],
-                ),
-              ...snapshot.data!.docs.map((DocumentSnapshot document) {
-                Map<String, dynamic> data =
-                    document.data() as Map<String, dynamic>;
-
-                  final List<dynamic> members = data['members'] ?? [];
-                  final int vagasTotais = data['vagas'] ; 
-                  final int vagasDisponiveis = vagasTotais - members.length;
-
-                if (data['origem'].toLowerCase().contains(
-                      _controllerOrigem.text.toLowerCase(),
-                    ) &&
-                    data['destino'].toLowerCase().contains(
-                      _controllerDestino.text.toLowerCase(),
-                    ) && 
-                    vagasDisponiveis > 0) {
-                  bool isOwner = data['creatorId'] == user.uid;
-                  return CaronaCard(
-                    data: data,
-                  ).build(isOwner, user, document.id, context);
-                } else {
-                  return Container();
-                }
-              }),
-            ],
-          );
-        },
+                      if (data['origem'].toLowerCase().contains(
+                            _controllerOrigem.text.toLowerCase(),
+                          ) &&
+                          data['destino'].toLowerCase().contains(
+                            _controllerDestino.text.toLowerCase(),
+                          ) &&
+                          vagasDisponiveis > 0) {
+                        bool isOwner = data['creatorId'] == user.uid;
+                        return CaronaCard(
+                          data: data,
+                        ).build(isOwner, user, document.id, context);
+                      } else {
+                        return Container();
+                      }
+                    }).toList(),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
