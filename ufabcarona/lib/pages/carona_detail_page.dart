@@ -351,7 +351,7 @@ class _CaronaDetailPageState extends State<CaronaDetailPage> {
                   ),
                   const SizedBox(height: 12),
                   buttonAction(
-                      Colors.green,
+                      Color(0xFF336600),
                       Colors.white,
                       "Reiniciar Corrida",
                       () {
