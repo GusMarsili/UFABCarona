@@ -108,7 +108,10 @@ class _CaronaFormsState extends State<CaronaForms> {
       _marcaController.text = widget.rideData!['marca'] ?? '';
       _modeloController.text = widget.rideData!['modelo'] ?? '';
       _placaController.text = widget.rideData!['placa'] ?? '';
-      _valorController.text = widget.rideData!['valor'] ?? '';
+      _valorController.text = widget.rideData?['valor'] != null
+    ? widget.rideData!['valor'].toStringAsFixed(2).replaceAll('.', ',')
+    : '';
+
       if (widget.rideData!['paradas'] != null) {
         List<dynamic> paradas = widget.rideData!['paradas'];
         _numParadas = paradas.length;
@@ -139,14 +142,20 @@ class _CaronaFormsState extends State<CaronaForms> {
     super.dispose();
   }
 
-  void _updateParadas(int numParadas) {
-    setState(() {
-      _numParadas = numParadas;
 
-      // Atualiza a lista de controladores para o número de paradas
-      _paradaControllers = List.generate(numParadas, (index) => TextEditingController());
-    });
-  }
+  void _updateParadas(int numParadas) {
+  setState(() {
+    if (numParadas > _paradaControllers.length) {
+      for (int i = _paradaControllers.length; i < numParadas; i++) {
+        _paradaControllers.add(TextEditingController());
+      }
+    } else if (numParadas < _paradaControllers.length) {
+      _paradaControllers = _paradaControllers.sublist(0, numParadas);
+    }
+    _numParadas = numParadas;
+  });
+}
+
 
   Future<void> _saveCarona() async {
     if (_formKey.currentState!.validate()) {
@@ -197,7 +206,8 @@ class _CaronaFormsState extends State<CaronaForms> {
           'marca': _marcaController.text,
           'modelo': _modeloController.text,
           'placa': _placaController.text,
-          'valor': _valorController.text,
+          'valor': valorDouble,
+          //'valor': _valorController.text,
           'paradas': paradas,
           'updatedAt': FieldValue.serverTimestamp(),
         });
