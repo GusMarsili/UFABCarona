@@ -847,7 +847,7 @@ class CaronaReservaCard extends Cards {
                                   style: const TextStyle(
                                     fontWeight: FontWeight.normal,
                                     fontFamily: 'Montserrat',
-                                    fontSize: 15,
+                                    fontSize: 14,
                                   ),
                                 );
                               },

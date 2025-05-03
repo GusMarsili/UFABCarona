@@ -25,6 +25,7 @@ class LoginScreen extends StatelessWidget {
     final List<String> extraAllowedEmails = [
       // coloque aqui outros e-mails com acesso
       "gustavo.marsiligm@gmail.com",
+      "juliana.braga@ufabc.edu.br",
     ];
 
     // Verifica se o email pertence ao domínio permitido ou está na whitelist
