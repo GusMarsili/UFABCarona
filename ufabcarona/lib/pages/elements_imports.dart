@@ -792,7 +792,7 @@ class CaronaReservaCard extends Cards {
         children: [
           
           SizedBox(
-            height: 160,
+            height: 165,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 18),
           
@@ -847,7 +847,7 @@ class CaronaReservaCard extends Cards {
                                   style: const TextStyle(
                                     fontWeight: FontWeight.normal,
                                     fontFamily: 'Montserrat',
-                                    fontSize: 14,
+                                    fontSize: 15,
                                   ),
                                 );
                               },
